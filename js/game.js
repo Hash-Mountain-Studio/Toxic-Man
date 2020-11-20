@@ -43,7 +43,7 @@ camera.position.z = -33;
 let controls = new THREE.OrbitControls(camera, renderer.domElement);
 
 // collada
-
+let shape;
 const loader = new ColladaLoader(loadingManager);
 loader.load("../models/Globe.dae", function(collada) {
     collada.scene.position.y += 10;
@@ -69,19 +69,36 @@ var render = function() {
 // Run game loop(update, render, repeat)
 var GameLoop = function() {
     requestAnimationFrame(GameLoop);
-
+    document.onkeypress = function(e) {
+        e = e || window.event;
+        switch (e.key) {
+            // Press 1
+            case "w":
+                elf.position.x += 5;
+                break;
+            case "s":
+                elf.position.x -= 5;
+                break;
+            case "a":
+                elf.position.z -= 5;
+                break;
+            case "d":
+                elf.position.z += 5;
+                break;
+        }
+    };
     update();
     render();
     /*console.log(
-                              "x: ",
-                              camera.position.x,
-                              "\ny: ",
-                              camera.position.y,
-                              "\nz: ",
-                              camera.position.z,
-                              "\n"
-                          );
-                          */
+                                                            "x: ",
+                                                            camera.position.x,
+                                                            "\ny: ",
+                                                            camera.position.y,
+                                                            "\nz: ",
+                                                            camera.position.z,
+                                                            "\n"
+                                                        );
+                                                        */
 };
 
 GameLoop();
