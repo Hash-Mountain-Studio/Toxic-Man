@@ -1,5 +1,6 @@
 import { ColladaLoader } from "../dependencies/ColladaLoader.js";
 
+localizer(1);
 var scene = new THREE.Scene();
 let ball;
 let maze;
@@ -44,23 +45,24 @@ const loadingManager = new THREE.LoadingManager(function () {
 // camera.position.y = 14;
 // camera.position.z = -33;
 
-camera.position.set( -17.67, 0, -0.035 );
+// SPHERE CAMERA
+camera.position.x = -4;
+camera.position.y = 3.8;
+camera.position.z = 0;
 
 let controls = new THREE.OrbitControls(camera, renderer.domElement);
 
-
-controls.update();
 // collada
 let shape;
 const loader = new ColladaLoader(loadingManager);
-loader.load("models/sphere.dae", function (collada) {
+loader.load("../models/sphere.dae", function (collada) {
   collada.scene.position.x += 0;
-  collada.scene.position.y += 1;
+  collada.scene.position.y += 0.75;
   collada.scene.position.z += 0;
   ball = collada.scene;
 });
 
-loader.load("models/pacman_maze.dae", function (collada) {
+loader.load("../models/pacman_maze.dae", function (collada) {
   collada.scene.position.y += 0;
   maze = collada.scene;
 });
@@ -74,107 +76,52 @@ scene.add(light);
 // Game Logic
 var update = function () {};
 
-
-function removeElement(elementId) {
-    var element = document.getElementById(elementId);
-    element.parentNode.parentNode.remove();
-}
-
-let isStarted = 0;
-document.getElementById("playButton").onclick = function(){
-    isStarted = 1;
-    removeElement("playButton");
-};
-
-
 //  Draw the scene
 var render = function () {
   renderer.render(scene, camera);
-  updateCameraInStart();
-  
 };
 
-let radius = 25;
-let theta = 20;
-let phi = 0;
-let thetaSpeed = 0.1;
-let phiSpeed = 0.3;
- 
-
-let radToDeg = function(radian){
-    return radian * 180 / Math.PI;
-};
-
-let degToRad = function(degree){
-    return degree * Math.PI / 180;
-};
-
-var updateCameraInStart = function () {
-    if(!isStarted){
-        updateCameraBeforeStart();
-    }
-    else {
-        updateCameraAfterStart();
-    }
-    
-};
-
-var updateCameraBeforeStart = function () {
-    if(theta >= 170 || theta <= 10){
-        thetaSpeed = -thetaSpeed;
-    }
-    phi = (phi + phiSpeed) % 360;
-    //console.log(theta, phi);
-    camera.position.set( -radius * Math.cos(degToRad(theta)), radius * Math.sin(degToRad(theta)), radius * Math.cos(degToRad(phi)));
-    if(ball){
-        camera.lookAt(ball.position.x, ball.position.y, ball.position.z);
-    }
-    
-    theta += thetaSpeed;
-};
-
-var updateCameraAfterStart = function () {
-    
-    camera.position.set(-4, 3.8, -0.035);
-    if(ball){
-        camera.lookAt(ball.position.x, ball.position.y, ball.position.z);
-    }
-};
-
-let move = function () {
-    if(isStarted){
-        document.onkeypress = function (e) {
-        e = e || window.event;
-            switch (e.key) {
-              case "w":
-                ball.position.x += 0.5;
-                camera.position.x += 0.5;
-                break;
-              case "s":
-                ball.position.x -= 0.5;
-                camera.position.x -= 0.5;
-                break;
-              case "a":
-                ball.position.z -= 0.5;
-                camera.position.z -= 0.5;
-                break;
-              case "d":
-                ball.position.z += 0.5;
-                camera.position.z += 0.5;
-                break;
-            }
-        }; 
-    }
-    
-};
+var old_mazeX = 0;
+var old_mazeY = 0;
+var old_symbol = ".";
 
 // Run game loop(update, render, repeat)
 var GameLoop = function () {
   requestAnimationFrame(GameLoop);
-  
-  move();
-  
-  
+  document.onkeypress = function (e) {
+    e = e || window.event;
+    switch (e.key) {
+      case "w":
+        ball.position.x += 0.25;
+        camera.position.x += 0.25;
+        break;
+      case "s":
+        ball.position.x -= 0.25;
+        camera.position.x -= 0.25;
+        break;
+      case "a":
+        ball.position.z -= 0.25;
+        camera.position.z -= 0.25;
+        break;
+      case "d":
+        ball.position.z += 0.25;
+        camera.position.z += 0.25;
+        break;
+    }
+
+    // calculate the new position in the maze
+    // if it is changed then update the maze_matrix
+    var new_mazePosition = localizer(ball.position.x, ball.position.z);
+    if (old_mazeX != new_mazePosition.x || old_mazeY != new_mazePosition.z) {
+      maze_matrix[old_mazeY][old_mazeX] = old_symbol;
+      old_symbol = maze_matrix[new_mazePosition.z][new_mazePosition.x];
+      maze_matrix[new_mazePosition.z][new_mazePosition.x] = "O";
+      old_mazeX = new_mazePosition.x;
+      old_mazeY = new_mazePosition.z;
+      console.clear();
+      print_mazeMat();
+    }
+  };
   update();
   render();
 };
