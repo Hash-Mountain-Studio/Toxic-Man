@@ -45,14 +45,6 @@ const loadingManager = new THREE.LoadingManager(function() {
 // camera.position.y = 14;
 // camera.position.z = -33;
 
-// SPHERE CAMERA
-//camera.position.x = -17.67;  // r*cosa
-//camera.position.y = 0;   // 10, 30
-//camera.position.z = -0.035;  // r*sina
-
-//camera.rotation.x = -17.67;  // -0.40
-//camera.rotation.y = 24.46;   // 10, 30
-//camera.rotation.z = -0.035;  // r*sina
 camera.position.set( -17.67, 0, -0.035 );
 
 let controls = new THREE.OrbitControls(camera, renderer.domElement);
@@ -92,8 +84,7 @@ function removeElement(elementId) {
 let isStarted = 0;
 document.getElementById("playButton").onclick = function(){
     isStarted = 1;
-    removeElement("playButton");
-    
+    removeElement("playButton");   
 };
 
 
@@ -102,7 +93,6 @@ document.getElementById("playButton").onclick = function(){
 var render = function () {
   renderer.render(scene, camera);
   updateCameraInStart();
-  //console.log(camera.position.y + " " + camera.rotation.y );
 };
 
 let radius = 25;
@@ -120,7 +110,37 @@ let degToRad = function(degree){
     return degree * Math.PI / 180;
 };
 
+let thetaDistance;
+let phiDistance;
+let radiusDistance;
+
+let startPosition = function (value, distance, startValue, range) {
+    if(value > startValue + range){
+        value -= distance / 500;
+    }
+    else if(value < startValue - range){
+        value -= distance / 500;
+    }
+    else {
+        value = startValue;
+    }
+    return value;
+};
+
 var updateCameraInStart = function () {
+    if(isStarted === 0){
+        thetaDistance = theta - 45;
+        phiDistance = phi - 90;
+        radiusDistance = radius - 5;
+        updateCameraBeforeStart();
+    }
+    if(isStarted === 1){
+        updateCameraAfterStart();
+    }
+    
+};
+
+var updateCameraBeforeStart = function () {
     if(theta >= 170 || theta <= 10){
         thetaSpeed = -thetaSpeed;
     }
@@ -132,6 +152,21 @@ var updateCameraInStart = function () {
     }
     
     theta += thetaSpeed;
+};
+
+var updateCameraAfterStart = function () {
+    
+    theta = startPosition(theta, thetaDistance, 45, 0.2);
+    phi = startPosition(phi, phiDistance, 90, 0.5);
+    radius = startPosition(radius, radiusDistance, 5, 0.2);
+    if(theta === 45 && phi === 90 && radius === 5){
+        isStarted = 2;
+    }
+    //console.log(theta, phi, radius);
+    camera.position.set( -radius * Math.cos(degToRad(theta)), radius * Math.sin(degToRad(theta)), radius * Math.cos(degToRad(phi)));
+    if(ball){
+        camera.lookAt(ball.position.x, ball.position.y, ball.position.z);
+    }
 };
 
 let isPressW = false;
@@ -214,32 +249,33 @@ var old_symbol = ".";
 // Run game loop(update, render, repeat)
 var GameLoop = function() {
     requestAnimationFrame(GameLoop);
-    if (isPressW) {
-        ball.position.x += speed;
-        camera.position.x += speed;
-        angleX += angleIncrement;
-        ball.rotation.y = angleX * (Math.PI / 180);
-        console.log("test2");
+    if(isStarted === 2){
+        if (isPressW) {
+            ball.position.x += speed;
+            camera.position.x += speed;
+            angleX += angleIncrement;
+            ball.rotation.y = angleX * (Math.PI / 180);
+            console.log("test2");
+        }
+        if (isPressS) {
+            ball.position.x -= speed;
+            camera.position.x -= speed;
+            angleX -= angleIncrement;
+            ball.rotation.y = angleX * (Math.PI / 180);
+        }
+        if (isPressA) {
+            ball.position.z -= speed;
+            camera.position.z -= speed;
+            angleY -= angleIncrement;
+            ball.rotation.x = angleY * (Math.PI / 180);
+        }
+        if (isPressD) {
+            ball.position.z += speed;
+            camera.position.z += speed;
+            angleY += angleIncrement;
+            ball.rotation.x = angleY * (Math.PI / 180);
+        }
     }
-    if (isPressS) {
-        ball.position.x -= speed;
-        camera.position.x -= speed;
-        angleX -= angleIncrement;
-        ball.rotation.y = angleX * (Math.PI / 180);
-    }
-    if (isPressA) {
-        ball.position.z -= speed;
-        camera.position.z -= speed;
-        angleY -= angleIncrement;
-        ball.rotation.x = angleY * (Math.PI / 180);
-    }
-    if (isPressD) {
-        ball.position.z += speed;
-        camera.position.z += speed;
-        angleY += angleIncrement;
-        ball.rotation.x = angleY * (Math.PI / 180);
-    }
-
     update();
     render();
 };

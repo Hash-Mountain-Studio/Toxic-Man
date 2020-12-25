@@ -84,7 +84,7 @@ button {
   margin-bottom: 10px;
 }
 
-.playButton {
+#playButton {
   height: 60px;
   line-height: 60px;
 }
@@ -101,7 +101,7 @@ button {
   background-color: var(--buttonColor3);
 }
 
-.playButton:hover {
+#playButton:hover {
   height: 70px;
   line-height: 70px;
   color: white;
