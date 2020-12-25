@@ -5,27 +5,37 @@
     rel="stylesheet"
     href="./css/styles.css"
   />
+  <link
+    rel="stylesheet"
+    href="./css/startMenu.css"
+  />
   <title>Toxic Man</title>
 </head>
 
 <body>
-  <script src="../dependencies/three.js"></script>
+  <script src="dependencies/three.js"></script>
   <script
     type="module"
-    src="../dependencies/OrbitControls.js"
+    src="dependencies/OrbitControls.js"
   ></script>
   <script
     type="module"
-    src="../dependencies/ColladaLoader.js"
-  ></script>
-  <script
-    type="text/javascript"
-    src="./js/maze_utils.js"
+    src="dependencies/ColladaLoader.js"
   ></script>
   <script
     type="module"
     src="./js/game.js"
   ></script>
+    <div id="logoAndMenu">
+        <img id="startMenuLogo" src="images/logo.png" alt="Hash Mountain Studio">
+        <div id="menu">
+            <div class="name">TOXIC-MAN</div>
+            <button id="playButton" class="menuButton">Play now!</button>
+            <button class="menuButton">High Scores</button>
+            <button class="menuButton">Credits</button> 
+        </div> 
+  </div>
+  
 </body>
 
 </html>
