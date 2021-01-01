@@ -1,5 +1,5 @@
 import { ColladaLoader } from "../dependencies/ColladaLoader.js";
-import { isStarted, updateCameraInStart, radToDeg } from "./startMenu.js";
+import { isStarted, updateCameraInStart, degToRad } from "./startMenu.js";
 
 var scene = new THREE.Scene();
 let ball;
@@ -85,15 +85,19 @@ let isPressD = false;
 document.addEventListener("keydown", function (e) {
     switch (e.key) {
         case "w":
+        case "W":
             isPressW = true;
             break;
         case "s":
+        case "S":
             isPressS = true;
             break;
         case "a":
+        case "A":
             isPressA = true;
             break;
         case "d":
+        case "D":
             isPressD = true;
             break;
     }
@@ -102,15 +106,19 @@ document.addEventListener("keydown", function (e) {
 document.addEventListener("keyup", function (e) {
     switch (e.key) {
         case "w":
+        case "W":
             isPressW = false;
             break;
         case "s":
+        case "S":
             isPressS = false;
             break;
         case "a":
+        case "A":
             isPressA = false;
             break;
         case "d":
+        case "D":
             isPressD = false;
             break;
     }
@@ -123,28 +131,41 @@ let angleIncrement = 10;
 // Run game loop(update, render, repeat)
 var GameLoop = function () {
     requestAnimationFrame(GameLoop);
+    //console.log(speed * Math.cos(degToRad(rotation_angle)))
     if (isStarted === 2 && ball) {
         if (isPressW) {
-            ball.position.x += speed;
+            //ball.position.x += speed;
+            ball.position.x += speed * Math.cos(degToRad(rotation_angle));
+            ball.position.z += speed * Math.sin(degToRad(rotation_angle));
+            camera.position.x += speed * Math.cos(degToRad(rotation_angle));
+            camera.position.z += speed * Math.sin(degToRad(rotation_angle));
             angleX += angleIncrement;
             ball.rotation.y = angleX * (Math.PI / 180);
-            camera.position.x += speed;
         }
         if (isPressS) {
-            ball.position.x -= speed;
-            camera.position.x -= speed;
+            //ball.position.x -= speed
+            ball.position.x -= speed * Math.cos(degToRad(rotation_angle));
+            ball.position.z -= speed * Math.sin(degToRad(rotation_angle));
+            camera.position.x -= speed * Math.cos(degToRad(rotation_angle));
+            camera.position.z -= speed * Math.sin(degToRad(rotation_angle));
             angleX -= angleIncrement;
             ball.rotation.y = angleX * (Math.PI / 180);
         }
         if (isPressA) {
-            ball.position.z -= speed;
-            camera.position.z -= speed;
+            //ball.position.z -= speed
+            ball.position.x += speed * Math.sin(degToRad(rotation_angle));
+            ball.position.z -= speed * Math.cos(degToRad(rotation_angle));
+            camera.position.x += speed * Math.sin(degToRad(rotation_angle));
+            camera.position.z -= speed * Math.cos(degToRad(rotation_angle));
             angleY -= angleIncrement;
             ball.rotation.x = angleY * (Math.PI / 180);
         }
         if (isPressD) {
-            ball.position.z += speed;
-            camera.position.z += speed;
+            //ball.position.z += speed
+            ball.position.x -= speed * Math.sin(degToRad(rotation_angle));
+            ball.position.z += speed * Math.cos(degToRad(rotation_angle));
+            camera.position.x -= speed * Math.sin(degToRad(rotation_angle));
+            camera.position.z += speed * Math.cos(degToRad(rotation_angle));
             angleY += angleIncrement;
             ball.rotation.x = angleY * (Math.PI / 180);
         }
