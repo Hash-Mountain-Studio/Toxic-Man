@@ -89,4 +89,4 @@ var updateCameraAfterStart = function (camera, ball) {
 
 var followCaracter = function (camera, ball) {};
 
-export { isStarted, updateCameraInStart, radToDeg };
+export { isStarted, updateCameraInStart, degToRad };

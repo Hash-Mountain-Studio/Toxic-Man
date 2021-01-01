@@ -9,6 +9,7 @@ let radToDeg = function (radian) {
 let rotateLeft = false;
 let rotateRight = false;
 let init_angle = 90;
+let rotation_angle = 0;
 
 let camRotate_speed = 10;
 let camTheta = 135;
@@ -98,6 +99,7 @@ function rotateCam_aroundPoint(point, direction, radius, camera) {
             camTheta += camRotate_speed;
             return true;
         } else {
+            rotation_angle = (rotation_angle + 90) % 360;
             return false;
         }
     } else if (direction == "right") {
@@ -105,6 +107,7 @@ function rotateCam_aroundPoint(point, direction, radius, camera) {
             camTheta -= camRotate_speed;
             return true;
         } else {
+            rotation_angle = (rotation_angle - 90) % 360;
             return false;
         }
     }
