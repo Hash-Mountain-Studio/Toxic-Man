@@ -1,5 +1,5 @@
 import { ColladaLoader } from "../dependencies/ColladaLoader.js";
-import { isStarted, updateCameraInStart, degToRad } from "./startMenu.js";
+import { isStarted, radius, updateCameraInStart, degToRad } from "./startMenu.js";
 
 var scene = new THREE.Scene();
 let ball;
@@ -30,10 +30,11 @@ const material = new THREE.MeshBasicMaterial({
 });
 
 // THREE.JS PLANE
-// const plane = new THREE.Mesh(geometry, material);
-// plane.rotateX(-Math.PI / 2);
-// scene.add(plane);
-
+ const plane = new THREE.Mesh(geometry, material);
+ plane.rotateX(Math.PI / 2);
+ plane.position.y = 0.001;
+ scene.add(plane);
+ 
 // COLLADA BEGINS
 const loadingManager = new THREE.LoadingManager(function () {
     scene.add(ball);
@@ -44,16 +45,19 @@ camera.position.set(-15, 0, -0.035);
 
 let controls = new THREE.OrbitControls(camera, renderer.domElement);
 
+
+
 controls.update();
 // collada
 let shape;
 const loader = new ColladaLoader(loadingManager);
 loader.load("models/sphere.dae", function (collada) {
     collada.scene.position.x += 0;
-    collada.scene.position.y += 1;
+    collada.scene.position.y += 0.75;
     collada.scene.position.z += 0;
     ball = collada.scene;
 });
+
 
 loader.load("models/pacman_maze.dae", function (collada) {
     collada.scene.position.y += 0;
@@ -123,57 +127,116 @@ document.addEventListener("keyup", function (e) {
             break;
     }
 });
-let speed = 0.3;
+let speed = 0.1;
 let angleX = 0;
 let angleY = 0;
 let angleIncrement = 10;
-
+rotation_angleX = 0;
+rotation_angleY = 53;
+let current_radius = 3.6;
 // Run game loop(update, render, repeat)
+let canvas = document.body;
+
+canvas.requestPointerLock = canvas.requestPointerLock ||
+                            canvas.mozRequestPointerLock;
+
+document.exitPointerLock = document.exitPointerLock ||
+                           document.mozExitPointerLock;
+
+let isActiveE = 0;
+
+document.onkeypress = function (e) {
+    //console.log(e)
+    if((e.key === "e" || e.key === "E") && isStarted === 2){
+        if(!isActiveE){
+            canvas.requestPointerLock();
+            isActiveE = 1;
+        }
+        else{
+            document.exitPointerLock();
+            isActiveE = 0;
+        }
+    }
+};
+
+document.addEventListener('pointerlockchange', lockChangeAlert, false);
+document.addEventListener('mozpointerlockchange', lockChangeAlert, false);
+
+function lockChangeAlert() {
+    if (document.pointerLockElement === canvas ||
+        document.mozPointerLockElement === canvas) {
+      document.addEventListener("mousemove", updateCamera, false);
+    } else {
+      document.removeEventListener("mousemove", updateCamera, false);
+    }
+}
+
+function updateCamera(e) {
+    rotation_angleX += e.movementX * 0.05;
+    if(rotation_angleY >= 20 && rotation_angleY <= 60){
+        rotation_angleY += e.movementY * 0.05;
+        current_radius += e.movementY * 0.001;
+    }
+    if(rotation_angleY < 30){
+        rotation_angleY = 30;
+        current_radius = 3.14;
+    }
+    if(rotation_angleY > 60){
+        rotation_angleY = 60;
+        current_radius = 3.74;
+    }
+    
+    //eyeY += e.movementY * 0.005;
+}
+    
 var GameLoop = function () {
     requestAnimationFrame(GameLoop);
     //console.log(speed * Math.cos(degToRad(rotation_angle)))
     if (isStarted === 2 && ball) {
         if (isPressW) {
             //ball.position.x += speed;
-            ball.position.x += speed * Math.cos(degToRad(rotation_angle));
-            ball.position.z += speed * Math.sin(degToRad(rotation_angle));
-            camera.position.x += speed * Math.cos(degToRad(rotation_angle));
-            camera.position.z += speed * Math.sin(degToRad(rotation_angle));
+            ball.position.x += speed * Math.cos(degToRad(rotation_angleX));
+            ball.position.z += speed * Math.sin(degToRad(rotation_angleX));
+            //camera.position.x += speed * Math.cos(degToRad(rotation_angle));
+            //camera.position.z += speed * Math.sin(degToRad(rotation_angle));
             angleX += angleIncrement;
             ball.rotation.y = angleX * (Math.PI / 180);
         }
         if (isPressS) {
             //ball.position.x -= speed
-            ball.position.x -= speed * Math.cos(degToRad(rotation_angle));
-            ball.position.z -= speed * Math.sin(degToRad(rotation_angle));
-            camera.position.x -= speed * Math.cos(degToRad(rotation_angle));
-            camera.position.z -= speed * Math.sin(degToRad(rotation_angle));
+            ball.position.x -= speed * Math.cos(degToRad(rotation_angleX));
+            ball.position.z -= speed * Math.sin(degToRad(rotation_angleX));
+            //camera.position.x -= speed * Math.cos(degToRad(rotation_angle));
+            //camera.position.z -= speed * Math.sin(degToRad(rotation_angle));
             angleX -= angleIncrement;
             ball.rotation.y = angleX * (Math.PI / 180);
         }
         if (isPressA) {
             //ball.position.z -= speed
-            ball.position.x += speed * Math.sin(degToRad(rotation_angle));
-            ball.position.z -= speed * Math.cos(degToRad(rotation_angle));
-            camera.position.x += speed * Math.sin(degToRad(rotation_angle));
-            camera.position.z -= speed * Math.cos(degToRad(rotation_angle));
+            ball.position.x += speed * Math.sin(degToRad(rotation_angleX));
+            ball.position.z -= speed * Math.cos(degToRad(rotation_angleX));
+            //camera.position.x += speed * Math.sin(degToRad(rotation_angle));
+            //camera.position.z -= speed * Math.cos(degToRad(rotation_angle));
             angleY -= angleIncrement;
             ball.rotation.x = angleY * (Math.PI / 180);
         }
         if (isPressD) {
             //ball.position.z += speed
-            ball.position.x -= speed * Math.sin(degToRad(rotation_angle));
-            ball.position.z += speed * Math.cos(degToRad(rotation_angle));
-            camera.position.x -= speed * Math.sin(degToRad(rotation_angle));
-            camera.position.z += speed * Math.cos(degToRad(rotation_angle));
+            ball.position.x -= speed * Math.sin(degToRad(rotation_angleX));
+            ball.position.z += speed * Math.cos(degToRad(rotation_angleX));
+            //camera.position.x -= speed * Math.sin(degToRad(rotation_angle));
+            //camera.position.z += speed * Math.cos(degToRad(rotation_angle));
             angleY += angleIncrement;
             ball.rotation.x = angleY * (Math.PI / 180);
         }
+        camera.position.x = ball.position.x - current_radius * Math.cos(degToRad(rotation_angleX));
+        camera.position.z = ball.position.z - current_radius * Math.sin(degToRad(rotation_angleX));
+        camera.position.y = ball.position.y + current_radius * Math.sin(degToRad(rotation_angleY));
         camera.lookAt(ball.position.x, ball.position.y, ball.position.z);
-
-        let corner = maze_mat.corner_check(ball.position.x, ball.position.z);
-        rotateCam_inCorner(corner, ball.position, camera, isPressD, isPressA);
-        maze_mat.refresh_mazeMat(ball.position.x, ball.position.z);
+        console.log(rotation_angleY, current_radius);
+        //let corner = maze_mat.corner_check(ball.position.x, ball.position.z);
+        //rotateCam_inCorner(corner, ball.position, camera, isPressD, isPressA);
+        //maze_mat.refresh_mazeMat(ball.position.x, ball.position.z);
     }
     update();
     render();

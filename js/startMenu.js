@@ -68,7 +68,7 @@ var updateCameraBeforeStart = function (camera, ball) {
 
     theta += thetaSpeed;
 };
-
+    
 var updateCameraAfterStart = function (camera, ball) {
     theta = startPosition(theta, thetaDistance, 45, 0.2);
     phi = startPosition(phi, phiDistance, 90, 0.5);
@@ -76,6 +76,7 @@ var updateCameraAfterStart = function (camera, ball) {
     if (theta === 45 && phi === 90 && radius === 5) {
         isStarted = 2;
     }
+    //console.log(camera.position)
     //console.log(theta, phi, radius);
     camera.position.set(
         -radius * Math.cos(degToRad(theta)),
@@ -89,4 +90,4 @@ var updateCameraAfterStart = function (camera, ball) {
 
 var followCaracter = function (camera, ball) {};
 
-export { isStarted, updateCameraInStart, degToRad };
+export { isStarted, radius, updateCameraInStart, degToRad };
