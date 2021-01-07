@@ -234,9 +234,11 @@ var GameLoop = function () {
         camera.position.y = ball.position.y + current_radius * Math.sin(degToRad(rotation_angleY));
         camera.lookAt(ball.position.x, ball.position.y, ball.position.z);
         console.log(rotation_angleY, current_radius);
-        //let corner = maze_mat.corner_check(ball.position.x, ball.position.z);
-        //rotateCam_inCorner(corner, ball.position, camera, isPressD, isPressA);
-        //maze_mat.refresh_mazeMat(ball.position.x, ball.position.z);
+
+        // corner check
+        let corner = maze_mat.corner_check(ball.position.x, ball.position.z);
+        rotateCam_inCorner(corner, ball.position, camera, isPressD, isPressA);
+        maze_mat.refresh_mazeMat(ball.position.x, ball.position.z);
     }
     update();
     render();
