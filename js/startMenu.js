@@ -8,7 +8,12 @@ let thetaDistance;
 let phiDistance;
 let radiusDistance;
 
-let isStarted = 0;
+// gameCondition = 0 --> not started yet
+// gameCondition = 1 --> started but  animation not finished
+// gameCondition = 2 --> started
+// gameCondition = 3 --> paused
+let gameCondition = 0;
+
 
 let radToDeg = function (radian) {
     return (radian * 180) / Math.PI;
@@ -18,21 +23,57 @@ let degToRad = function (degree) {
     return (degree * Math.PI) / 180;
 };
 
-function removeElement(elementId) {
-    var element = document.getElementById(elementId);
-    element.parentNode.parentNode.remove();
-}
 
-document.getElementById("playButton").onclick = function () {
-    isStarted = 1;
-    removeElement("playButton");
+document.addEventListener("click",function(e){
+    if(e.target.id === "playButton"){
+        gameCondition = 1;
+        removeElement("playButton");
+    }
+    if(e.target.id === "restartButton"){
+        window.location.reload(false);
+    }
+    if(e.target.id === "highScores"){
+        removeElement("playButton");
+        addHighScoreTable();
+    }
+    if(e.target.id === "closeButton"){
+        removeElement(e.target.id);
+        
+        if(gameCondition === 0){
+            addStartMenu();
+        }
+        
+        if(gameCondition === 3){
+            addPauseMenu();
+        }
+            
+    }
+});
+document.onkeydown = function (e) {
+    if((e.key === "p" || e.key === "P")){
+        
+        if(gameCondition === 2){
+            // add pause screen
+            gameCondition = 3;
+            addPauseMenu();
+        }
+        else if (gameCondition === 3){
+            // remove pause screen and continue
+            gameCondition = 2;
+            let element = document.getElementById("playButton");
+            if(!element){
+               element = document.getElementById("closeButton");
+            }
+            element.parentNode.parentNode.remove();
+        }
+    }
 };
 
 let startPosition = function (value, distance, startValue, range) {
     if (value > startValue + range) {
-        value -= distance / 500;
+        value -= distance / 100;
     } else if (value < startValue - range) {
-        value -= distance / 500;
+        value -= distance / 100;
     } else {
         value = startValue;
     }
@@ -40,13 +81,13 @@ let startPosition = function (value, distance, startValue, range) {
 };
 
 var updateCameraInStart = function (camera, ball) {
-    if (isStarted === 0) {
+    if (gameCondition === 0) {
         thetaDistance = theta - 45;
         phiDistance = phi - 90;
         radiusDistance = radius - 5;
         updateCameraBeforeStart(camera, ball);
     }
-    if (isStarted === 1) {
+    if (gameCondition === 1) {
         updateCameraAfterStart(camera, ball);
     }
 };
@@ -56,7 +97,6 @@ var updateCameraBeforeStart = function (camera, ball) {
         thetaSpeed = -thetaSpeed;
     }
     phi = (phi + phiSpeed) % 360;
-    //console.log(theta, phi);
     camera.position.set(
         -radius * Math.cos(degToRad(theta)),
         radius * Math.sin(degToRad(theta)),
@@ -74,10 +114,8 @@ var updateCameraAfterStart = function (camera, ball) {
     phi = startPosition(phi, phiDistance, 90, 0.5);
     radius = startPosition(radius, radiusDistance, 5, 0.2);
     if (theta === 45 && phi === 90 && radius === 5) {
-        isStarted = 2;
+        gameCondition = 2;
     }
-    //console.log(camera.position)
-    //console.log(theta, phi, radius);
     camera.position.set(
         -radius * Math.cos(degToRad(theta)),
         radius * Math.sin(degToRad(theta)),
@@ -90,4 +128,4 @@ var updateCameraAfterStart = function (camera, ball) {
 
 var followCaracter = function (camera, ball) {};
 
-export { isStarted, radius, updateCameraInStart, degToRad };
+export { gameCondition, radius, updateCameraInStart, degToRad };

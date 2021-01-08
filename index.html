@@ -1,6 +1,7 @@
 <html>
 
 <head>
+   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
   <link
     rel="stylesheet"
     href="./css/styles.css"
@@ -21,6 +22,10 @@
   <script
     type="module"
     src="dependencies/ColladaLoader.js"
+  ></script>
+  <script
+    type="text/javascript"
+    src="./js/events.js"
   ></script>
   <script
     type="text/javascript"
@@ -46,8 +51,8 @@
         id="playButton"
         class="menuButton"
       >Play now!</button>
-      <button class="menuButton">High Scores</button>
-      <button class="menuButton">Credits</button>
+      <button id="highScores" class="menuButton">High Scores</button>
+      <button id="credits" class="menuButton">Credits</button>
     </div>
   </div>
 

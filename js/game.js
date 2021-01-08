@@ -1,5 +1,5 @@
 import { ColladaLoader } from "../dependencies/ColladaLoader.js";
-import { isStarted, radius, updateCameraInStart, degToRad } from "./startMenu.js";
+import { gameCondition, radius, updateCameraInStart, degToRad } from "./startMenu.js";
 
 var scene = new THREE.Scene();
 let ball;
@@ -147,7 +147,7 @@ let isActiveE = 0;
 
 document.onkeypress = function (e) {
     //console.log(e)
-    if((e.key === "e" || e.key === "E") && isStarted === 2){
+    if((e.key === "e" || e.key === "E") && gameCondition === 2){
         if(!isActiveE){
             canvas.requestPointerLock();
             isActiveE = 1;
@@ -172,19 +172,22 @@ function lockChangeAlert() {
 }
 
 function updateCamera(e) {
-    rotation_angleX += e.movementX * 0.05;
-    if(rotation_angleY >= 20 && rotation_angleY <= 60){
-        rotation_angleY += e.movementY * 0.05;
-        current_radius += e.movementY * 0.001;
+    if(gameCondition === 2){
+        rotation_angleX += e.movementX * 0.05;
+        if(rotation_angleY >= 20 && rotation_angleY <= 60){
+            rotation_angleY += e.movementY * 0.05;
+            current_radius += e.movementY * 0.001;
+        }
+        if(rotation_angleY < 30){
+            rotation_angleY = 30;
+            current_radius = 3.14;
+        }
+        if(rotation_angleY > 60){
+            rotation_angleY = 60;
+            current_radius = 3.74;
+        }
     }
-    if(rotation_angleY < 30){
-        rotation_angleY = 30;
-        current_radius = 3.14;
-    }
-    if(rotation_angleY > 60){
-        rotation_angleY = 60;
-        current_radius = 3.74;
-    }
+    
     
     //eyeY += e.movementY * 0.005;
 }
@@ -192,7 +195,7 @@ function updateCamera(e) {
 var GameLoop = function () {
     requestAnimationFrame(GameLoop);
     //console.log(speed * Math.cos(degToRad(rotation_angle)))
-    if (isStarted === 2 && ball) {
+    if (gameCondition === 2 && ball) {
         if (isPressW) {
             //ball.position.x += speed;
             ball.position.x += speed * Math.cos(degToRad(rotation_angleX));
@@ -233,12 +236,11 @@ var GameLoop = function () {
         camera.position.z = ball.position.z - current_radius * Math.sin(degToRad(rotation_angleX));
         camera.position.y = ball.position.y + current_radius * Math.sin(degToRad(rotation_angleY));
         camera.lookAt(ball.position.x, ball.position.y, ball.position.z);
-        console.log(rotation_angleY, current_radius);
-
+        
         // corner check
-        let corner = maze_mat.corner_check(ball.position.x, ball.position.z);
-        rotateCam_inCorner(corner, ball.position, camera, isPressD, isPressA);
-        maze_mat.refresh_mazeMat(ball.position.x, ball.position.z);
+        //let corner = maze_mat.corner_check(ball.position.x, ball.position.z);
+        //rotateCam_inCorner(corner, ball.position, camera, isPressD, isPressA);
+        //maze_mat.refresh_mazeMat(ball.position.x, ball.position.z);
     }
     update();
     render();
