@@ -12,6 +12,7 @@ let radiusDistance;
 // gameCondition = 1 --> started but  animation not finished
 // gameCondition = 2 --> started
 // gameCondition = 3 --> paused
+// gameCondition = 4 --> finished
 let gameCondition = 0;
 
 
@@ -23,6 +24,11 @@ let degToRad = function (degree) {
     return (degree * Math.PI) / 180;
 };
 
+function gameOver(){
+    if(gameCondition === 4){
+        enterNickNameMenu();
+    }
+};
 
 document.addEventListener("click",function(e){
     if(e.target.id === "playButton"){
@@ -66,6 +72,10 @@ document.onkeydown = function (e) {
             }
             element.parentNode.parentNode.remove();
         }
+    }
+    if((e.key === "q" || e.key === "Q") && gameCondition === 2){
+        gameCondition = 4;
+        gameOver();
     }
 };
 
@@ -125,7 +135,5 @@ var updateCameraAfterStart = function (camera, ball) {
         camera.lookAt(ball.position.x, ball.position.y, ball.position.z);
     }
 };
-
-var followCaracter = function (camera, ball) {};
 
 export { gameCondition, radius, updateCameraInStart, degToRad };

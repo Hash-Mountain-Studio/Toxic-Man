@@ -79,6 +79,9 @@ var update = function () {};
 var render = function () {
     renderer.render(scene, camera);
     updateCameraInStart(camera, ball);
+    if(gameCondition === 4){
+        
+    }
 };
 
 let isPressW = false;

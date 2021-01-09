@@ -26,61 +26,21 @@ function addHighScoreTable(){
                   <th scope="col">Level</th>
                 </tr>
             </thead>
-            <tbody>
-                <tr>
-                  <th scope="col">#</th>
-                  <th scope="col">NickName</th>
-                  <th scope="col">Score</th>
-                  <th scope="col">Level</th>
-                </tr>
-                <tr>
-                  <th scope="col">#</th>
-                  <th scope="col">NickName</th>
-                  <th scope="col">Score</th>
-                  <th scope="col">Level</th>
-                </tr><tr>
-                  <th scope="col">#</th>
-                  <th scope="col">NickName</th>
-                  <th scope="col">Score</th>
-                  <th scope="col">Level</th>
-                </tr><tr>
-                  <th scope="col">#</th>
-                  <th scope="col">NickName</th>
-                  <th scope="col">Score</th>
-                  <th scope="col">Level</th>
-                </tr><tr>
-                  <th scope="col">#</th>
-                  <th scope="col">NickName</th>
-                  <th scope="col">Score</th>
-                  <th scope="col">Level</th>
-                </tr><tr>
-                  <th scope="col">#</th>
-                  <th scope="col">NickName</th>
-                  <th scope="col">Score</th>
-                  <th scope="col">Level</th>
-                </tr><tr>
-                  <th scope="col">#</th>
-                  <th scope="col">NickName</th>
-                  <th scope="col">Score</th>
-                  <th scope="col">Level</th>
-                </tr><tr>
-                  <th scope="col">#</th>
-                  <th scope="col">NickName</th>
-                  <th scope="col">Score</th>
-                  <th scope="col">Level</th>
-                </tr><tr>
-                  <th scope="col">#</th>
-                  <th scope="col">NickName</th>
-                  <th scope="col">Score</th>
-                  <th scope="col">Level</th>
-                </tr>
-
-              </tbody>
+            <tbody></tbody>
         </table>
       </div>`;
 
     body.appendChild(element);
-    //console.log(body);
+    const tbody = document.querySelector("tbody");
+    for(let i=0; i<getHighScoresFromStorage().length; i++){
+        let element = document.createElement("tr");
+        element.innerHTML = `
+                  <th scope="col">${i+1}</th>
+                  <th scope="col">${getHighScoresFromStorage()[i][0]}</th>
+                  <th scope="col">${getHighScoresFromStorage()[i][1]}</th>
+                  <th scope="col">${getHighScoresFromStorage()[i][2]}</th>`;
+        tbody.appendChild(element);
+    }
 }
 
 function addStartMenu(){
@@ -132,4 +92,21 @@ function addPauseMenu(){
 
     body.appendChild(element);
         
+}
+
+function enterNickNameMenu(){
+    const body = document.querySelector("body");
+        
+    let element = document.createElement("div");
+    element.id = "logoAndMenu";
+    element.innerHTML = `
+      <div id="menu">
+        <form id = "todo-form" name="form">
+            <input class="form-control" type="text" name="nickname" id = "nickname" placeholder="Enter a Nickname">
+            <button>Add to Table</button>
+        </form>
+      </div>`;
+
+    body.appendChild(element);
+    addToStorage();
 }
