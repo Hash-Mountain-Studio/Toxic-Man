@@ -100,10 +100,11 @@ function enterNickNameMenu(){
     let element = document.createElement("div");
     element.id = "logoAndMenu";
     element.innerHTML = `
-      <div id="menu">
+      <div id="finishedGame">
+        <div class="name">GAME OVER</div>
         <form id = "todo-form" name="form">
             <input class="form-control" type="text" name="nickname" id = "nickname" placeholder="Enter a Nickname">
-            <button>Add to Table</button>
+            <button class="menuButton addButton">Add to Table</button>
         </form>
       </div>`;
 

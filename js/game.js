@@ -23,9 +23,12 @@ window.addEventListener("resize", function () {
     camera.updateProjectionMatrix();
 });
 
-const geometry = new THREE.PlaneGeometry(1000, 1000, 8, 8);
+const geometry = new THREE.PlaneGeometry(100, 100, 8, 8);
+
+const texture = new THREE.TextureLoader().load( 'ground.png' );
+
 const material = new THREE.MeshBasicMaterial({
-    color: 0x1d2951,
+    map: texture,
     side: THREE.DoubleSide,
 });
 

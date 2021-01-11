@@ -1,12 +1,5 @@
 :root {
-  --backgroundColor: rgba(246, 241, 209);
-  --colorShadeA: rgb(106, 163, 137);
-  --colorShadeB: rgb(121, 186, 156);
-  --colorShadeC: rgb(150, 232, 195);
-  --colorShadeD: rgb(187, 232, 211);
-  --colorShadeE: rgb(205, 255, 232);
   --menuBackgroundColor: rgba(40, 50, 70, 0.9);
-  --highScoreBackgroundColor: rgb(40, 50, 70);
   --buttonColor: rgb(80, 180, 160);
   --buttonColor2: rgb(254, 74, 0);
   --buttonColor3: rgb(25, 124, 100);
@@ -85,6 +78,17 @@ button {
   margin-top: 10px;
   margin-bottom: 10px;
 }
+.addButton {
+  font-size: 12px;
+}
+
+#nickname {
+    font-size: 16px;
+    padding: 10px;
+    border-radius: 10px;
+}
+
+
 
 #playButton {
   height: 60px;
@@ -161,3 +165,22 @@ i {
     padding-top: 15px;
     padding-bottom: 30px;
 }
+
+#finishedGame {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    background-color: var(--menuBackgroundColor); 
+    width: 100%;
+    border-radius: 40px;
+    padding: 30px
+}
+
+#todo-form {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
