@@ -325,8 +325,13 @@ class Maze {
                 "#",
             ],
         ];
+        /*
+        141 + 148 = 289
+        */
         this.old_symbol = ".";
         this.mazeLoc = { x: 0, z: 0 };
+        this.graph = new Graph((this.maze_matrix.length-1)*(this.maze_matrix.length-1));
+        this.graph.fillGraph(this.maze_matrix);
     }
 
     // returns the x-maze and z-maze coordinates of given object
@@ -357,8 +362,9 @@ class Maze {
             this.maze_matrix[new_mazeLoc.x][new_mazeLoc.z] = "O";
             this.mazeLoc.x = new_mazeLoc.x;
             this.mazeLoc.z = new_mazeLoc.z;
-            // console.clear();
-            // this.print_mazeMat();
+            console.clear();
+            this.print_mazeMat();
+            console.log(new_mazeLoc.x, new_mazeLoc.z);
         }
     }
 

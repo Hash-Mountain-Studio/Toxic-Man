@@ -3,6 +3,11 @@ import { gameCondition, radius, updateCameraInStart, degToRad } from "./startMen
 
 var scene = new THREE.Scene();
 let ball;
+let ghost1;
+let ghost2;
+var ghost1_path;
+var ghost2_path;
+
 let maze;
 var camera = new THREE.PerspectiveCamera(
     75,
@@ -38,6 +43,8 @@ const material = new THREE.MeshBasicMaterial({
 // COLLADA BEGINS
 const loadingManager = new THREE.LoadingManager(function () {
     scene.add(ball);
+    scene.add(ghost1);
+    scene.add(ghost2);
     scene.add(maze);
 });
 
@@ -49,27 +56,54 @@ let controls = new THREE.OrbitControls(camera, renderer.domElement);
 
 controls.update();
 // collada
-let shape;
+let BallObject;
+let GhostObject;
+let GhostObject2;
 const loader = new ColladaLoader(loadingManager);
 loader.load("models/sphere.dae", function (collada) {
     collada.scene.position.x += 0;
-    collada.scene.position.y += 0.75;
+    collada.scene.position.y += 0.5;
     collada.scene.position.z += 0;
     ball = collada.scene;
+    BallObject = new Movable(ball);
 });
 
+loader.load("models/ghost.dae", function (collada) {
+    collada.scene.position.x += 14;
+    collada.scene.position.y += 0.75;
+    collada.scene.position.z += -14;
+    ghost1 = collada.scene;
+    GhostObject = new Movable(ghost1);
+});
 
-loader.load("models/pacman_maze.dae", function (collada) {
+loader.load("models/ghost2.dae", function (collada) {
+    collada.scene.position.x += 14;
+    collada.scene.position.y += 0.75;
+    collada.scene.position.z += 14;
+    ghost2 = collada.scene;
+    GhostObject2 = new Movable(ghost2);
+});
+
+loader.load("models/pacman_maze_cubes.dae", function (collada) {
     collada.scene.position.y += 0;
     maze = collada.scene;
 });
 let maze_mat = new Maze();
 
-const light = new THREE.AmbientLight(0x404040, 10); // soft white light
-light.position.set(10, 20, 0);
-scene.add(light);
-
 // COLLADA END
+
+const hemiLight = new THREE.HemisphereLight( 0xffffff, 0x444444 );
+    hemiLight.position.set( 0, 200, 0 );
+    scene.add( hemiLight );
+
+    const dirLight = new THREE.DirectionalLight( 0xffffff );
+    dirLight.position.set( 0, 200, 100 );
+    dirLight.castShadow = true;
+    dirLight.shadow.camera.top = 180;
+    dirLight.shadow.camera.bottom = - 100;
+    dirLight.shadow.camera.left = - 120;
+    dirLight.shadow.camera.right = 120;
+    scene.add( dirLight );
 
 // Game Logic
 var update = function () {};
@@ -104,6 +138,18 @@ document.addEventListener("keydown", function (e) {
         case "D":
             isPressD = true;
             break;
+        case "x":
+        case "X":
+            // call the green ghost
+            ghost2_path = maze_mat.graph.shortest_path(GhostObject2.get_mazeCoord(maze_mat), BallObject.get_mazeCoord(maze_mat));
+            break;
+        case "z":
+        case "Z":
+            // call the red ghost
+            ghost1_path = maze_mat.graph.shortest_path(GhostObject.get_mazeCoord(maze_mat), BallObject.get_mazeCoord(maze_mat));
+            break;
+
+        
     }
 });
 
@@ -146,7 +192,6 @@ document.exitPointerLock = document.exitPointerLock ||
 let isActiveE = 0;
 
 document.onkeypress = function (e) {
-    //console.log(e)
     if((e.key === "e" || e.key === "E") && gameCondition === 2){
         if(!isActiveE){
             canvas.requestPointerLock();
@@ -191,52 +236,68 @@ function updateCamera(e) {
     
     //eyeY += e.movementY * 0.005;
 }
-    
+
+// shortest path from ghost's locaction to pacman's location
+
 var GameLoop = function () {
     requestAnimationFrame(GameLoop);
-    //console.log(speed * Math.cos(degToRad(rotation_angle)))
     if (gameCondition === 2 && ball) {
         if (isPressW) {
-            //ball.position.x += speed;
-            ball.position.x += speed * Math.cos(degToRad(rotation_angleX));
-            ball.position.z += speed * Math.sin(degToRad(rotation_angleX));
-            //camera.position.x += speed * Math.cos(degToRad(rotation_angle));
-            //camera.position.z += speed * Math.sin(degToRad(rotation_angle));
-            angleX += angleIncrement;
-            ball.rotation.y = angleX * (Math.PI / 180);
+
+            BallObject.speedUp(speed * Math.cos(degToRad(rotation_angleX)), 0, speed * Math.sin(degToRad(rotation_angleX)));
+            BallObject.rotation(0, 0, -angleIncrement);
+            // ball.position.x += speed * Math.cos(degToRad(rotation_angleX));
+            // ball.position.z += speed * Math.sin(degToRad(rotation_angleX));
+
+            // angleX += angleIncrement;
+            // ball.rotation.y = angleX * (Math.PI / 180);
         }
         if (isPressS) {
-            //ball.position.x -= speed
-            ball.position.x -= speed * Math.cos(degToRad(rotation_angleX));
-            ball.position.z -= speed * Math.sin(degToRad(rotation_angleX));
-            //camera.position.x -= speed * Math.cos(degToRad(rotation_angle));
-            //camera.position.z -= speed * Math.sin(degToRad(rotation_angle));
-            angleX -= angleIncrement;
-            ball.rotation.y = angleX * (Math.PI / 180);
+            BallObject.speedUp(-speed * Math.cos(degToRad(rotation_angleX)), 0, -speed * Math.sin(degToRad(rotation_angleX)));
+            BallObject.rotation(0, 0, angleIncrement);
+            // ball.position.x -= speed * Math.cos(degToRad(rotation_angleX));
+            // ball.position.z -= speed * Math.sin(degToRad(rotation_angleX));
+
+            // angleX -= angleIncrement;
+            // ball.rotation.y = angleX * (Math.PI / 180);
         }
         if (isPressA) {
-            //ball.position.z -= speed
-            ball.position.x += speed * Math.sin(degToRad(rotation_angleX));
-            ball.position.z -= speed * Math.cos(degToRad(rotation_angleX));
-            //camera.position.x += speed * Math.sin(degToRad(rotation_angle));
-            //camera.position.z -= speed * Math.cos(degToRad(rotation_angle));
-            angleY -= angleIncrement;
-            ball.rotation.x = angleY * (Math.PI / 180);
+            BallObject.speedUp(speed * Math.sin(degToRad(rotation_angleX)), 0, -speed * Math.cos(degToRad(rotation_angleX)));
+            BallObject.rotation(-angleIncrement, 0, 0);
+
+            // ball.position.x += speed * Math.sin(degToRad(rotation_angleX));
+            // ball.position.z -= speed * Math.cos(degToRad(rotation_angleX));
+
+            // angleY -= angleIncrement;
+            // ball.rotation.x = angleY * (Math.PI / 180);
         }
         if (isPressD) {
-            //ball.position.z += speed
-            ball.position.x -= speed * Math.sin(degToRad(rotation_angleX));
-            ball.position.z += speed * Math.cos(degToRad(rotation_angleX));
-            //camera.position.x -= speed * Math.sin(degToRad(rotation_angle));
-            //camera.position.z += speed * Math.cos(degToRad(rotation_angle));
-            angleY += angleIncrement;
-            ball.rotation.x = angleY * (Math.PI / 180);
+            BallObject.speedUp(-speed * Math.sin(degToRad(rotation_angleX)), 0, speed * Math.cos(degToRad(rotation_angleX)));
+            BallObject.rotation(angleIncrement, 0, 0);
+
+            // ball.position.x -= speed * Math.sin(degToRad(rotation_angleX));
+            // ball.position.z += speed * Math.cos(degToRad(rotation_angleX));
+
+            // angleY += angleIncrement;
+            // ball.rotation.x = angleY * (Math.PI / 180);
         }
+
+
+        GhostObject.execute_thePath(ghost1_path);
+        GhostObject2.execute_thePath(ghost2_path);
+
+
+        BallObject.action();
+        BallObject.resetMotion();
+        GhostObject.action();
+        GhostObject.resetMotion();
+        GhostObject2.action();
+        GhostObject2.resetMotion();
+    
         camera.position.x = ball.position.x - current_radius * Math.cos(degToRad(rotation_angleX));
         camera.position.z = ball.position.z - current_radius * Math.sin(degToRad(rotation_angleX));
         camera.position.y = ball.position.y + current_radius * Math.sin(degToRad(rotation_angleY));
         camera.lookAt(ball.position.x, ball.position.y, ball.position.z);
-        
         // corner check
         //let corner = maze_mat.corner_check(ball.position.x, ball.position.z);
         //rotateCam_inCorner(corner, ball.position, camera, isPressD, isPressA);
