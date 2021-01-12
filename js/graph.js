@@ -104,10 +104,8 @@ class Graph {
         this.dijkstra_sp(start);
         var to_node = dest;
         var path = [];
-        console.log(this.distTo.get(dest));
         while (to_node != start) {
             let from_node = this.edgeTo.get(to_node);
-            console.log(from_node, to_node);
 
             if (parseInt(from_node.split(":")[0]) < parseInt(to_node.split(":")[0])) {
                 path.push("back");
@@ -122,7 +120,6 @@ class Graph {
                 path.push("left");
             }
             to_node = from_node;
-            console.log("q");
         }
         return path.reverse();
     }
