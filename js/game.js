@@ -1,12 +1,14 @@
 import { ColladaLoader } from "../dependencies/ColladaLoader.js";
+import { Geometry } from "../dependencies/three.module.js";
 import { gameCondition, radius, updateCameraInStart, degToRad } from "./startMenu.js";
 
 var scene = new THREE.Scene();
 let ball;
 let ghost1;
 let ghost2;
-var ghost1_path;
-var ghost2_path;
+let BallObject;
+let GhostObject;
+let GhostObject2;
 
 let maze;
 var camera = new THREE.PerspectiveCamera(
@@ -15,6 +17,12 @@ var camera = new THREE.PerspectiveCamera(
     0.1,
     1000
 );
+camera.position.set(-15, 0, -0.035);
+
+// we dont need this since we have two type of camera move options (mouse or keys)
+// let controls = new THREE.OrbitControls(camera, renderer.domElement);
+// controls.update();
+
 
 var renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
@@ -28,40 +36,40 @@ window.addEventListener("resize", function () {
     camera.updateProjectionMatrix();
 });
 
-const geometry = new THREE.PlaneGeometry(100, 100, 8, 8);
-
-const texture = new THREE.TextureLoader().load( 'ground.png' );
-
-const material = new THREE.MeshBasicMaterial({
-    map: texture,
-    side: THREE.DoubleSide,
-});
-
 // THREE.JS PLANE
- const plane = new THREE.Mesh(geometry, material);
- plane.rotateX(Math.PI / 2);
- plane.position.y = 0.001;
- scene.add(plane);
- 
+// const plane_geometry = new THREE.PlaneGeometry(32, 32, 8, 8);
+// const plane_texture = new THREE.TextureLoader().load( 'ground.png' );
+// const plane_material = new THREE.MeshBasicMaterial({
+//     map: plane_texture,
+//     side: THREE.DoubleSide,
+// });
+// const plane = new THREE.Mesh(plane_geometry, plane_material);
+// plane.rotateX(Math.PI / 2);
+// plane.position.y = 0.001;
+var cubegeo = new THREE.CubeGeometry(1000, 1000, 1000);
+var cube_materials = [
+    new THREE.MeshBasicMaterial ({ map: new THREE.TextureLoader().load( 'images/skybox_space/ft.png' ), side: THREE.DoubleSide}),
+    new THREE.MeshBasicMaterial({ map: new THREE.TextureLoader().load(  'images/skybox_space/bk.png' ), side: THREE.DoubleSide}),
+    new THREE.MeshBasicMaterial({ map: new THREE.TextureLoader().load(  'images/skybox_space/up.png' ), side: THREE.DoubleSide}),
+    new THREE.MeshBasicMaterial({ map: new THREE.TextureLoader().load(  'images/skybox_space/dn.png' ), side: THREE.DoubleSide}),
+    new THREE.MeshBasicMaterial({ map: new THREE.TextureLoader().load(  'images/skybox_space/rt.png' ), side: THREE.DoubleSide}),
+    new THREE.MeshBasicMaterial({ map: new THREE.TextureLoader().load(  'images/skybox_space/lf.png' ), side: THREE.DoubleSide}),
+];
+
+var cubeMaterial = new THREE.MeshFaceMaterial(cube_materials);
+var cube = new THREE.Mesh(cubegeo, cubeMaterial);
+
+
 // COLLADA BEGINS
 const loadingManager = new THREE.LoadingManager(function () {
     scene.add(ball);
     scene.add(ghost1);
     scene.add(ghost2);
     scene.add(maze);
+    scene.add(cube);
+    // scene.add(plane);
 });
 
-camera.position.set(-15, 0, -0.035);
-
-let controls = new THREE.OrbitControls(camera, renderer.domElement);
-
-
-
-controls.update();
-// collada
-let BallObject;
-let GhostObject;
-let GhostObject2;
 const loader = new ColladaLoader(loadingManager);
 loader.load("models/sphere.dae", function (collada) {
     collada.scene.position.x += 0;
@@ -93,6 +101,23 @@ loader.load("models/pacman_maze_cubes.dae", function (collada) {
 });
 let maze_mat = new Maze();
 
+
+// barrel
+var barrels = [];
+for (var vertex of maze_mat.graph.getVertices()) {
+    let passNode = Math.random() < 0.5;
+    if (passNode) {
+        continue;
+    }
+    let worldLoc = maze_mat.mazeLoc2worldLoc(vertex);
+    loader.load("models/barrel.dae", function (collada) {
+        collada.scene.position.x += worldLoc.x;
+        collada.scene.position.y += 0;
+        collada.scene.position.z += worldLoc.z;
+        barrels.push(collada.scene);
+        scene.add(collada.scene)
+    });
+}
 // COLLADA END
 
 const hemiLight = new THREE.HemisphereLight( 0xffffff, 0x444444 );
@@ -147,12 +172,12 @@ document.addEventListener("keydown", function (e) {
         case "x":
         case "X":
             // call the green ghost
-            ghost2_path = maze_mat.graph.shortest_path(GhostObject2.get_mazeCoord(maze_mat), BallObject.get_mazeCoord(maze_mat));
+            GhostObject2.path = maze_mat.graph.shortest_path(GhostObject2.get_mazeCoord(maze_mat), BallObject.get_mazeCoord(maze_mat));
             break;
         case "z":
         case "Z":
             // call the red ghost
-            ghost1_path = maze_mat.graph.shortest_path(GhostObject.get_mazeCoord(maze_mat), BallObject.get_mazeCoord(maze_mat));
+            GhostObject.path = maze_mat.graph.shortest_path(GhostObject.get_mazeCoord(maze_mat), BallObject.get_mazeCoord(maze_mat));
             break;
 
         
@@ -179,7 +204,7 @@ document.addEventListener("keyup", function (e) {
             break;
     }
 });
-let speed = 0.1;
+let speed = 0.2;
 let angleX = 0;
 let angleY = 0;
 let angleIncrement = 10;
@@ -289,8 +314,8 @@ var GameLoop = function () {
         }
 
 
-        GhostObject.execute_thePath(ghost1_path);
-        GhostObject2.execute_thePath(ghost2_path);
+        GhostObject.execute_thePath();
+        GhostObject2.execute_thePath();
 
 
         BallObject.action();

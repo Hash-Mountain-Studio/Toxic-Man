@@ -6,6 +6,7 @@ class Movable {
         this.old_position = {x:object.position.x, y:object.position.y, z:object.position.z};
         this.auto_speed = 0.2;
         this.isCommand_continue = false;
+        this.path;
     }
 
     action(){
@@ -84,11 +85,11 @@ class Movable {
         
     }
 
-    execute_thePath(path){
-        if (path == undefined || path == null) {
+    execute_thePath(){
+        if (this.path == undefined || this.path == null) {
             return;
         }
-        let command = path[0];
+        let command = this.path[0];
         if (command == "forward") {
             this.isCommand_continue = this.oneStepForward();
         }
@@ -101,10 +102,10 @@ class Movable {
         else if (command == "right") {
             this.isCommand_continue = this.oneStepRight();            
         }
-        if (!this.isCommand_continue && path.length != 0) {
-            path.shift();
+        if (!this.isCommand_continue && this.path.length != 0) {
+            this.path.shift();
         }
-
+    
     }
 
     speedUp(x, y, z){

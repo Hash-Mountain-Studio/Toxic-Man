@@ -1,7 +1,7 @@
 class Graph {
     //https://www.geeksforgeeks.org/implementation-graph-javascript/
-    constructor(vertex_num){
-        this.vertex_num = vertex_num;
+    constructor(){
+        this.vertex_num = 0;
         this.adjList = new Map();
         this.distTo;
         this.edgeTo;
@@ -9,6 +9,7 @@ class Graph {
 
     addVertex(vertex_id){
         this.adjList.set(vertex_id, []);
+        this.vertex_num++;
     }
 
     addEdge(vertex_id, adj_vertex){
@@ -122,6 +123,19 @@ class Graph {
             to_node = from_node;
         }
         return path.reverse();
+    }
+
+    getRandomNode(){
+        let keys = Array.from(this.adjList.keys());
+        return keys[Math.floor(Math.random() * keys.length)];
+    }
+
+    getVertices(){
+        return this.adjList.keys();
+    }
+
+    getVertexNum(){
+        return this.vertex_num;
     }
 
 

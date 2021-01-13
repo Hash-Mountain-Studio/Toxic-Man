@@ -330,7 +330,7 @@ class Maze {
         */
         this.old_symbol = ".";
         this.mazeLoc = { x: 0, z: 0 };
-        this.graph = new Graph((this.maze_matrix.length-1)*(this.maze_matrix.length-1));
+        this.graph = new Graph();
         this.graph.fillGraph(this.maze_matrix);
     }
 
@@ -347,6 +347,14 @@ class Maze {
         in_matrix_x = Math.max(in_matrix_x, 1);
         in_matrix_z = Math.max(in_matrix_z, 1);
         return { x: in_matrix_x, z: in_matrix_z };
+    }
+
+    mazeLoc2worldLoc(mazeloc){
+        let maze_x = mazeloc.split(":")[0];
+        let maze_z = mazeloc.split(":")[1];
+        let world_x = (7-maze_x)*2;
+        let world_z = (maze_z-7)*2;
+        return {x:world_x, z:world_z};
     }
 
     // calculate the new position in the maze
