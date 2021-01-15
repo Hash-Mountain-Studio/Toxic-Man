@@ -43,6 +43,51 @@ function addHighScoreTable(){
     }
 }
 
+function addControls(){
+    const body = document.querySelector("body");
+    let element = document.createElement("div");
+    element.id = "controlTable";
+    element.innerHTML = `
+      <div  class="menuScores">
+        <i id="closeButton" class="fa fa-times" aria-hidden="true"></i>
+        <div class="name">High Scores</div>
+        <table id = "scoreTable">
+            <tbody>
+                <tr>
+                  <th scope="col">w</th>
+                  <th scope="col">Move Forward</th>
+                </tr>
+                <tr>
+                  <th scope="col">s</th>
+                  <th scope="col">Move Backward</th>
+                </tr>
+                <tr>
+                  <th scope="col">a</th>
+                  <th scope="col">Move Left</th>
+                </tr>
+                <tr>
+                  <th scope="col">d</th>
+                  <th scope="col">Move Righ</th>
+                </tr>
+                <tr>
+                  <th scope="col">e</th>
+                  <th scope="col">Pointer Lock</th>
+                </tr>
+                <tr>
+                  <th scope="col">p</th>
+                  <th scope="col">Pause Game</th>
+                </tr>
+                <tr>
+                  <th scope="col">q</th>
+                  <th scope="col">Quit Game</th>
+                </tr>
+            </tbody>
+        </table>
+      </div>`;
+
+    body.appendChild(element);
+}
+
 function addStartMenu(){
     const body = document.querySelector("body");
         
@@ -61,7 +106,7 @@ function addStartMenu(){
           class="menuButton"
         >Play now!</button>
         <button id="highScores" class="menuButton">High Scores</button>
-        <button id="credits" class="menuButton">Credits</button>
+        <button id="controls" class="menuButton">Controls</button>
       </div>`;
 
     body.appendChild(element);
@@ -87,7 +132,7 @@ function addPauseMenu(){
         >Continue</button>
         <button id ="restartButton" class="menuButton">Restart Game</button>
         <button id ="highScores" class="menuButton">High Scores</button>
-        <button id ="credits" class="menuButton">Credits</button>
+        <button id ="controls" class="menuButton">Controls</button>
       </div>`;
 
     body.appendChild(element);

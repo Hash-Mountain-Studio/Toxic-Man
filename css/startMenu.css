@@ -124,6 +124,15 @@ button {
     min-width: 650px;
 }
 
+#controlTable {
+    position: fixed;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    width: 650px;
+}
+
 #scoreTable {
     color: white;
     font-size: 20px;

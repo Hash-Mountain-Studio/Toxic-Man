@@ -2,7 +2,10 @@ import { ColladaLoader } from "../dependencies/ColladaLoader.js";
 import { Geometry } from "../dependencies/three.module.js";
 import {
     gameCondition,
+    changed,
     radius,
+    setGameCondition,
+    setChanged,
     updateCameraInStart,
     degToRad,
 } from "./startMenu.js";
@@ -82,23 +85,72 @@ var cubeMaterial = new THREE.MeshFaceMaterial(cube_materials);
 var cube = new THREE.Mesh(cubegeo, cubeMaterial);
 
 var sliderOptions = {
-    xSlider: 0,
-    ySlider: 0,
-    camx: 0,
-    camy: 0,
+    //paused: false,
+    muted: false,
+    changeFreely: false,
+    
+    lightPositionX: 50,
+    lightPositionY: 200,
+    lightPositionZ: 50,
+    
+    lightDirectionX: 0,
+    lightDirectionY: 200,
+    lightDirectionZ: 100,
+    
+    cameraPositionX: -25,
+    cameraPositionY: 25,
+    cameraPositionZ: 0,
+    
+    cameraTargetX: 0,
+    cameraTargetY: 0,
+    cameraTargetZ: 0
 };
 
 var gui = new dat.GUI();
-var xy = gui.addFolder("Position");
-xy.add(sliderOptions, "xSlider", -3, 5).listen();
-xy.add(sliderOptions, "ySlider", -15, 5).listen();
 
-xy.open();
 
-var camxy = gui.addFolder("Camera Position");
-camxy.add(sliderOptions, "camx", -0.2, 0.2).name("X").listen();
-camxy.add(sliderOptions, "camy", -0.2, 0.2).name("Y").listen();
-camxy.open();
+var general = gui.addFolder("GeneralSettings");
+general.add(sliderOptions, 'muted').listen();
+general.add(sliderOptions, 'changeFreely').listen();
+general.open();
+
+var lightPos = gui.addFolder("Light Position");
+lightPos.add(sliderOptions, "lightPositionX", -200, 200).listen();
+lightPos.add(sliderOptions, "lightPositionY", 0, 400).listen();
+lightPos.add(sliderOptions, "lightPositionZ", -200, 200).listen();
+lightPos.open();
+
+var lightDir = gui.addFolder("Light Rotation");
+lightDir.add(sliderOptions, "lightDirectionX", -200, 200).listen();
+lightDir.add(sliderOptions, "lightDirectionY", 0, 400).listen();
+lightDir.add(sliderOptions, "lightDirectionZ", -200, 200).listen();
+lightDir.open();
+
+var cameraPos = gui.addFolder("Camera Position");
+cameraPos.add(sliderOptions, "cameraPositionX", -50, 50).listen();
+cameraPos.add(sliderOptions, "cameraPositionY", 0, 100).listen();
+cameraPos.add(sliderOptions, "cameraPositionZ", -50, 50).listen();
+cameraPos.open();
+
+var cameraTarget = gui.addFolder("Camera Target");
+cameraTarget.add(sliderOptions, "cameraTargetX", -50, 50).listen();
+cameraTarget.add(sliderOptions, "cameraTargetY", 0, 100).listen();
+cameraTarget.add(sliderOptions, "cameraTargetZ", -50, 50).listen();
+cameraTarget.open();
+
+const useSliders = function(){
+    
+    //lightPosition
+    hemiLight.position.set(sliderOptions.lightPositionX, sliderOptions.lightPositionY, sliderOptions.lightPositionZ);
+    
+    //lightDirection
+    dirLight.position.set(sliderOptions.lightDirectionX, sliderOptions.lightDirectionY, sliderOptions.lightDirectionZ);
+    
+    if(sliderOptions.changeFreely){
+        camera.position.set(sliderOptions.cameraPositionX, sliderOptions.cameraPositionY, sliderOptions.cameraPositionZ);
+        camera.lookAt(sliderOptions.cameraTargetX, sliderOptions.cameraTargetY, sliderOptions.cameraTargetZ);
+    }
+}
 
 // COLLADA BEGINS
 const loadingManager = new THREE.LoadingManager(function() {
@@ -245,7 +297,7 @@ document.addEventListener("keyup", function(e) {
             break;
     }
 });
-let speed = 0.2;
+let speed = 0.1;
 let angleX = 0;
 let angleY = 0;
 let angleIncrement = 10;
@@ -261,7 +313,7 @@ canvas.requestPointerLock =
 document.exitPointerLock =
     document.exitPointerLock || document.mozExitPointerLock;
 
-let isActiveE = 0;
+let isActiveE = 1;
 
 document.onkeypress = function(e) {
     if ((e.key === "e" || e.key === "E") && gameCondition === 2) {
@@ -316,10 +368,8 @@ function collisionCheckSystemWithMachineLearningAndDeepLearning() {
     let sy = ball.position.y;
     let sz = -ball.position.z;
     let radius = 0.4;
-    console.log(sx + " " + sy + " " + sz);
     for (let i = 0; i < 150; i++) {
-        console.log(i);
-        if (maze["children"][i]["name"].substr(0, 5) != "Cube.") continue;
+        if (maze["children"][i]["name"].substr(0, 5) !== "Cube.") continue;
 
         let currentCube = maze["children"][i];
         // Cube Coordinates
@@ -379,14 +429,27 @@ function moveRight() {
     BallObject.action();
     BallObject.resetMotion();
 }
+
 var GameLoop = function() {
     requestAnimationFrame(GameLoop);
+    if(changed){
+        if(gameCondition === 2 ){
+            canvas.requestPointerLock();
+        }
+        else{
+            document.exitPointerLock();
+        }
+        setChanged(0);
+    }
+    
+    
+    useSliders();
 
     if (gameCondition === 2 && ball) {
-        if (collisionCheckSystemWithMachineLearningAndDeepLearning() == false) {
+        if (collisionCheckSystemWithMachineLearningAndDeepLearning() === false) {
             if (isPressW) {
                 moveForward();
-                if (collisionCheckSystemWithMachineLearningAndDeepLearning() == true)
+                if (collisionCheckSystemWithMachineLearningAndDeepLearning() === true)
                     moveBackward();
                 // ball.position.x += speed * Math.cos(degToRad(rotation_angleX));
                 // ball.position.z += speed * Math.sin(degToRad(rotation_angleX));
@@ -436,13 +499,16 @@ var GameLoop = function() {
         GhostObject2.action();
         GhostObject2.resetMotion();
 
-        camera.position.x =
-            ball.position.x - current_radius * Math.cos(degToRad(rotation_angleX));
-        camera.position.z =
-            ball.position.z - current_radius * Math.sin(degToRad(rotation_angleX));
-        camera.position.y =
-            ball.position.y + current_radius * Math.sin(degToRad(rotation_angleY));
-        camera.lookAt(ball.position.x, ball.position.y, ball.position.z);
+        if(!sliderOptions.changeFreely){
+            camera.position.x =
+                ball.position.x - current_radius * Math.cos(degToRad(rotation_angleX));
+            camera.position.z =
+                ball.position.z - current_radius * Math.sin(degToRad(rotation_angleX));
+            camera.position.y =
+                ball.position.y + current_radius * Math.sin(degToRad(rotation_angleY));
+            camera.lookAt(ball.position.x, ball.position.y, ball.position.z);
+        }
+        
         // corner check
         //let corner = maze_mat.corner_check(ball.position.x, ball.position.z);
         //rotateCam_inCorner(corner, ball.position, camera, isPressD, isPressA);

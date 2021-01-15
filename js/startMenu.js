@@ -15,6 +15,16 @@ let radiusDistance;
 // gameCondition = 4 --> finished
 let gameCondition = 0;
 
+let changed = 0;
+
+function setGameCondition(condition){
+    gameCondition = condition;
+    changed = 1;
+}
+
+function setChanged(val){
+    changed = val;
+}
 
 let radToDeg = function (radian) {
     return (radian * 180) / Math.PI;
@@ -33,6 +43,7 @@ function gameOver(){
 document.addEventListener("click",function(e){
     if(e.target.id === "playButton"){
         gameCondition = 1;
+        changed = 1;
         removeElement("playButton");
     }
     if(e.target.id === "restartButton"){
@@ -52,6 +63,10 @@ document.addEventListener("click",function(e){
         if(gameCondition === 3){
             addPauseMenu();
         }
+    }
+    if(e.target.id === "controls"){
+        removeElement("playButton");
+        addControls();
             
     }
 });
@@ -61,11 +76,13 @@ document.onkeydown = function (e) {
         if(gameCondition === 2){
             // add pause screen
             gameCondition = 3;
+            changed = 1;
             addPauseMenu();
         }
         else if (gameCondition === 3){
             // remove pause screen and continue
             gameCondition = 2;
+            changed = 1;
             let element = document.getElementById("playButton");
             if(!element){
                element = document.getElementById("closeButton");
@@ -75,6 +92,7 @@ document.onkeydown = function (e) {
     }
     if((e.key === "q" || e.key === "Q") && gameCondition === 2){
         gameCondition = 4;
+        changed = 1;
         gameOver();
     }
 };
@@ -125,6 +143,7 @@ var updateCameraAfterStart = function (camera, ball) {
     radius = startPosition(radius, radiusDistance, 5, 0.2);
     if (theta === 45 && phi === 90 && radius === 5) {
         gameCondition = 2;
+        changed = 1;
     }
     camera.position.set(
         -radius * Math.cos(degToRad(theta)),
@@ -136,4 +155,4 @@ var updateCameraAfterStart = function (camera, ball) {
     }
 };
 
-export { gameCondition, radius, updateCameraInStart, degToRad };
+export { gameCondition, changed, radius, setGameCondition, setChanged, updateCameraInStart, degToRad };
