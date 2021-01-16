@@ -92,6 +92,13 @@ var cube_materials = [
     }),
 ];
 
+function setChecked(prop) {
+    for (let param in shadingTypes) {
+        shadingTypes[param] = false;
+    }
+    shadingTypes[prop] = true;
+}
+
 var cubeMaterial = new THREE.MeshFaceMaterial(cube_materials);
 var cube = new THREE.Mesh(cubegeo, cubeMaterial);
 
@@ -123,6 +130,12 @@ var sliderOptions = {
     cameraTargetZ: 0,
 };
 
+let shadingTypes = {
+    phongShading: true,
+    toonShading: false,
+    lambertShading: false,
+};
+
 var gui = new dat.GUI();
 
 var general = gui.addFolder("General Settings");
@@ -150,6 +163,32 @@ general
     .name("Spot Light Type")
     .listen();
 general.open();
+
+var shading = gui.addFolder("Shading");
+shading
+    .add(shadingTypes, "phongShading")
+    .name("Phong Shading")
+    .listen()
+    .onChange(function() {
+        setChecked("phongShading");
+        makePhongShading();
+    });
+shading
+    .add(shadingTypes, "toonShading")
+    .name("Toon Shading")
+    .listen()
+    .onChange(function() {
+        setChecked("toonShading");
+        makeToonShading();
+    });
+shading
+    .add(shadingTypes, "lambertShading")
+    .name("Lambert Shading")
+    .listen()
+    .onChange(function() {
+        setChecked("lambertShading");
+        makeLambertShading();
+    });
 
 var lightPos = gui.addFolder("Light Position");
 lightPos
@@ -621,7 +660,204 @@ function moveRight() {
     BallObject.resetMotion();
 }
 
-let score = 0;
+function makeToonShading() {
+    let materialRedToonShading = new THREE.MeshToonMaterial({
+        color: 0xff0346,
+    });
+
+    // ONLY FOR PLANE
+    let materialYellowToonShading = new THREE.MeshToonMaterial({
+        color: 0xc7f100,
+        side: THREE.DoubleSide,
+    });
+
+    let materialBlueToonShading = new THREE.MeshToonMaterial({ color: 0x0097ff });
+
+    let materialGreenToonShading = new THREE.MeshToonMaterial({
+        color: 0x00ff58,
+    });
+
+    let materialPurpleToonShading = new THREE.MeshToonMaterial({
+        color: 0x8a2be2,
+    });
+
+    let materialWaterGreenToonShading = new THREE.MeshToonMaterial({
+        color: 0x8affa7,
+    });
+    BallObject.object["children"][0]["material"] = materialRedToonShading;
+    GhostObject.object["children"][0]["material"] = materialPurpleToonShading;
+    GhostObject2.object["children"][0][
+        "material"
+    ] = materialWaterGreenToonShading;
+
+    // Barrels Materials
+    for (let i = 0; i < barrels.length; i++) {
+        let currentBarrel = barrels[i];
+        currentBarrel["children"][0]["material"] = materialGreenToonShading;
+    }
+
+    // Maze Materials
+    for (let i = 0; i < 150; i++) {
+        if (maze["children"][i]["name"].substr(0, 5) !== "Cube.") continue;
+
+        let currentCube = maze["children"][i];
+        currentCube["material"] = materialBlueToonShading;
+    }
+
+    // Plane Material
+    plane["material"] = materialYellowToonShading;
+}
+
+function makePhongShading() {
+    let materialRedPhongShading = new THREE.MeshPhongMaterial({
+        ambient: 0x050505,
+        specular: 0x555555,
+        shininess: 30,
+        color: 0xff0346,
+    });
+
+    let materialYellowPhongShading = new THREE.MeshPhongMaterial({
+        ambient: 0x050505,
+        specular: 0x555555,
+        shininess: 30,
+        color: 0xc7f100,
+        side: THREE.DoubleSide,
+    });
+
+    let materialBluePhongShading = new THREE.MeshPhongMaterial({
+        ambient: 0x050505,
+        specular: 0x555555,
+        shininess: 30,
+        color: 0x0097ff,
+    });
+
+    let materialGreenPhongShading = new THREE.MeshPhongMaterial({
+        ambient: 0x050505,
+        specular: 0x555555,
+        shininess: 30,
+        color: 0x00ff58,
+    });
+
+    let materialPurplePhongShading = new THREE.MeshPhongMaterial({
+        ambient: 0x050505,
+        specular: 0x555555,
+        shininess: 30,
+        color: 0x8a2be2,
+    });
+
+    let materialWaterGreenPhongShading = new THREE.MeshPhongMaterial({
+        ambient: 0x050505,
+        specular: 0x555555,
+        shininess: 30,
+        color: 0x8affa7,
+    });
+
+    BallObject.object["children"][0]["material"] = materialRedPhongShading;
+    GhostObject.object["children"][0]["material"] = materialPurplePhongShading;
+    GhostObject2.object["children"][0][
+        "material"
+    ] = materialWaterGreenPhongShading;
+
+    // Barrels Materials
+    for (let i = 0; i < barrels.length; i++) {
+        let currentBarrel = barrels[i];
+        currentBarrel["children"][0]["material"] = materialGreenPhongShading;
+    }
+
+    // Maze Materials
+    for (let i = 0; i < 150; i++) {
+        if (maze["children"][i]["name"].substr(0, 5) !== "Cube.") continue;
+
+        let currentCube = maze["children"][i];
+        currentCube["material"] = materialBluePhongShading;
+    }
+
+    // Plane Material
+    plane["material"] = materialYellowPhongShading;
+}
+
+function makeLambertShading() {
+    let materialRedLambertShading = new THREE.MeshLambertMaterial({
+        ambient: 0x050505,
+        specular: 0x555555,
+        shininess: 30,
+        color: 0xff0346,
+    });
+
+    let materialYellowLambertShading = new THREE.MeshLambertMaterial({
+        ambient: 0x050505,
+        specular: 0x555555,
+        shininess: 30,
+        color: 0xc7f100,
+        side: THREE.DoubleSide,
+    });
+
+    let materialBlueLambertShading = new THREE.MeshLambertMaterial({
+        ambient: 0x050505,
+        specular: 0x555555,
+        shininess: 30,
+        color: 0x0097ff,
+    });
+
+    let materialGreenLambertShading = new THREE.MeshLambertMaterial({
+        ambient: 0x050505,
+        specular: 0x555555,
+        shininess: 30,
+        color: 0x00ff58,
+    });
+
+    let materialPurpleLambertShading = new THREE.MeshLambertMaterial({
+        ambient: 0x050505,
+        specular: 0x555555,
+        shininess: 30,
+        color: 0x8a2be2,
+    });
+
+    let materialWaterGreenLambertShading = new THREE.MeshLambertMaterial({
+        ambient: 0x050505,
+        specular: 0x555555,
+        shininess: 30,
+        color: 0x8affa7,
+    });
+
+    BallObject.object["children"][0]["material"] = materialRedLambertShading;
+    GhostObject.object["children"][0]["material"] = materialPurpleLambertShading;
+    GhostObject2.object["children"][0][
+        "material"
+    ] = materialWaterGreenLambertShading;
+
+    // Barrels Materials
+    for (let i = 0; i < barrels.length; i++) {
+        let currentBarrel = barrels[i];
+        currentBarrel["children"][0]["material"] = materialGreenLambertShading;
+    }
+
+    // Maze Materials
+    for (let i = 0; i < 150; i++) {
+        if (maze["children"][i]["name"].substr(0, 5) !== "Cube.") continue;
+
+        let currentCube = maze["children"][i];
+        currentCube["material"] = materialBlueLambertShading;
+    }
+
+    // Plane Material
+    plane["material"] = materialYellowLambertShading;
+}
+
+const listener = new THREE.AudioListener();
+camera.add(listener);
+
+// create a global audio source
+const sound = new THREE.Audio(listener);
+
+// load a sound and set it as the Audio object's buffer
+const audioLoader = new THREE.AudioLoader();
+audioLoader.load("sounds/main-theme.mp3", function(buffer) {
+    sound.setBuffer(buffer);
+    sound.setLoop(true);
+    sound.setVolume(0.5);
+    sound.play();
+});
 
 var GameLoop = function() {
     requestAnimationFrame(GameLoop);
@@ -692,7 +928,6 @@ var GameLoop = function() {
         }
         GhostObject.execute_thePath();
         GhostObject2.execute_thePath();
-
         let barrelsCollisionCheckResult = collisionCheckForBarrels();
         if (
             collisionCheckForTwoSpheres(
@@ -703,7 +938,7 @@ var GameLoop = function() {
             ) == true
         ) {
             console.log("ghost1 collision!");
-            gameOver(score);
+            gameOver();
         } else if (
             collisionCheckForTwoSpheres(
                 BallObject.object,
@@ -713,7 +948,7 @@ var GameLoop = function() {
             ) == true
         ) {
             console.log("ghost2 collision!");
-            gameOver(score);
+            gameOver();
         } else if (barrelsCollisionCheckResult != -23) {
             barrels[barrelsCollisionCheckResult]["visible"] = false;
             score++;

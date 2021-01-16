@@ -34,11 +34,11 @@ let degToRad = function(degree) {
     return (degree * Math.PI) / 180;
 };
 
-function gameOver(score) {
+function gameOver() {
     removeScoreboard();
     gameCondition = 4;
     changed = 1;
-    enterNickNameMenu(score);
+    enterNickNameMenu();
 }
 
 document.addEventListener("click", function(e) {

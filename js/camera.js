@@ -1,8 +1,8 @@
-let degToRad = function (degree) {
+let degToRad = function(degree) {
     return (degree * Math.PI) / 180;
 };
 
-let radToDeg = function (radian) {
+let radToDeg = function(radian) {
     return (radian * 180) / Math.PI;
 };
 
@@ -85,10 +85,10 @@ function rotateCam_inCorner(corner, ball, camera, isPress_d, isPress_a) {
 function rotateCam_aroundPoint(point, direction, radius, camera) {
     camera.position.set(
         radius * (Math.cos(degToRad(camTheta)) - Math.sin(degToRad(camTheta))) +
-            point.x,
+        point.x,
         camera.position.y,
         radius * (Math.sin(degToRad(camTheta)) + Math.cos(degToRad(camTheta))) +
-            point.z
+        point.z
     );
     camera.lookAt(point.x, point.y, point.z);
 

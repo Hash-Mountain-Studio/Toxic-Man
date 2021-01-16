@@ -1,9 +1,10 @@
 
+let score = 0;
+
 function addScore(e){
      
     const newScore = document.querySelector("#nickname").value.trim();
     let level = 1;
-    let score = Math.random() * 20;
     let flag = 0;
     let isNewAdded = 0; 
     
@@ -44,9 +45,8 @@ function getHighScoresFromStorage(){
 
 
 function addToStorage(){
-   
+    console.log();
     document.querySelector("#todo-form").addEventListener("submit", addScore);
-    
     //console.log(getHighScoresFromStorage());
     //todos.splice(index, 0, "Lene");
     

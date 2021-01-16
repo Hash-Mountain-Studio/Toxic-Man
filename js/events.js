@@ -140,7 +140,7 @@ function addPauseMenu(){
         
 }
 
-function enterNickNameMenu(score){
+function enterNickNameMenu(){
     const body = document.querySelector("body");
         
     let element = document.createElement("div");
@@ -173,6 +173,4 @@ function addScoreboard(){
 function removeScoreboard(){
     document.querySelector("body").style.alignItems = "center";
     document.querySelector("body").style.justifyContent = "center";
-    
-    console.log(document.getElementById("scoreboard"));
 }
