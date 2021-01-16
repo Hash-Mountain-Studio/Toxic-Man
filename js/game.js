@@ -42,6 +42,12 @@ window.addEventListener("resize", function() {
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
 });
+// THREE.JS PLANE
+const plane_geometry = new THREE.PlaneGeometry(32, 32, 8, 8);
+const plane_material = new THREE.MeshLambertMaterial( {color: 0xffff00, side: THREE.DoubleSide} );
+const plane = new THREE.Mesh(plane_geometry, plane_material);
+plane.rotateX(Math.PI / 2);
+plane.position.y = 0.001;
 
 // THREE.JS PLANE
 // const plane_geometry = new THREE.PlaneGeometry(32, 32, 8, 8);
@@ -53,6 +59,7 @@ window.addEventListener("resize", function() {
 // const plane = new THREE.Mesh(plane_geometry, plane_material);
 // plane.rotateX(Math.PI / 2);
 // plane.position.y = 0.001;
+
 var cubegeo = new THREE.CubeGeometry(1000, 1000, 1000);
 var cube_materials = [
     new THREE.MeshBasicMaterial({
@@ -88,14 +95,20 @@ var sliderOptions = {
     //paused: false,
     muted: false,
     changeFreely: false,
+    isDay: true,
+    spotLightFromAbove: true,
     
     lightPositionX: 50,
     lightPositionY: 200,
     lightPositionZ: 50,
     
-    lightDirectionX: 0,
-    lightDirectionY: 200,
-    lightDirectionZ: 100,
+    spotLightPositionX: 0,
+    spotLightPositionY: 10,
+    spotLightPositionZ: 0,
+    
+    spotLightTargetX: 0,
+    spotLightTargetY: 0,
+    spotLightTargetZ: 0,
     
     cameraPositionX: -25,
     cameraPositionY: 25,
@@ -109,48 +122,111 @@ var sliderOptions = {
 var gui = new dat.GUI();
 
 
-var general = gui.addFolder("GeneralSettings");
+var general = gui.addFolder("General Settings");
 general.add(sliderOptions, 'muted').listen();
 general.add(sliderOptions, 'changeFreely').listen();
+general.add(sliderOptions, 'isDay').name("Day/Night").listen().onChange(function(){
+    if(sliderOptions.isDay){
+        scene.remove(hemiLightNight);
+        scene.add(hemiLightDay);
+        scene.remove(spotLight);
+        scene.add(dirLight);
+    }
+    else{
+        scene.remove(hemiLightDay);
+        scene.add(hemiLightNight);
+        scene.remove(dirLight);
+        scene.add(spotLight);
+    }
+});
+general.add(sliderOptions, 'spotLightFromAbove').name("Spot Light Type").listen();
 general.open();
 
 var lightPos = gui.addFolder("Light Position");
-lightPos.add(sliderOptions, "lightPositionX", -200, 200).listen();
-lightPos.add(sliderOptions, "lightPositionY", 0, 400).listen();
-lightPos.add(sliderOptions, "lightPositionZ", -200, 200).listen();
+lightPos.add(sliderOptions, "lightPositionX", -200, 200).name("Position X").listen();
+lightPos.add(sliderOptions, "lightPositionY", 0, 400).name("Position Y").listen();
+lightPos.add(sliderOptions, "lightPositionZ", -200, 200).name("Position Z").listen();
 lightPos.open();
 
-var lightDir = gui.addFolder("Light Rotation");
-lightDir.add(sliderOptions, "lightDirectionX", -200, 200).listen();
-lightDir.add(sliderOptions, "lightDirectionY", 0, 400).listen();
-lightDir.add(sliderOptions, "lightDirectionZ", -200, 200).listen();
-lightDir.open();
+var spotLightPos = gui.addFolder("Spot Light Position");
+spotLightPos.add(sliderOptions, "spotLightPositionX", -32, 32).name("Position X").listen();
+spotLightPos.add(sliderOptions, "spotLightPositionY", 0, 200).name("Position Y").listen();
+spotLightPos.add(sliderOptions, "spotLightPositionZ", -32, 32).name("Position Z").listen();
+spotLightPos.open();
+
+var spotLightTarget = gui.addFolder("Spot Light Target");
+spotLightTarget.add(sliderOptions, "spotLightTargetX", -32, 32).name("Target X").listen();
+spotLightTarget.add(sliderOptions, "spotLightTargetZ", -32, 32).name("Target Z").listen();
+spotLightTarget.open();
+
 
 var cameraPos = gui.addFolder("Camera Position");
-cameraPos.add(sliderOptions, "cameraPositionX", -50, 50).listen();
-cameraPos.add(sliderOptions, "cameraPositionY", 0, 100).listen();
-cameraPos.add(sliderOptions, "cameraPositionZ", -50, 50).listen();
+cameraPos.add(sliderOptions, "cameraPositionX", -50, 50).name("Position X").listen();
+cameraPos.add(sliderOptions, "cameraPositionY", 0, 100).name("Position Y").listen();
+cameraPos.add(sliderOptions, "cameraPositionZ", -50, 50).name("Position Z").listen();
 cameraPos.open();
 
 var cameraTarget = gui.addFolder("Camera Target");
-cameraTarget.add(sliderOptions, "cameraTargetX", -50, 50).listen();
-cameraTarget.add(sliderOptions, "cameraTargetY", 0, 100).listen();
-cameraTarget.add(sliderOptions, "cameraTargetZ", -50, 50).listen();
+cameraTarget.add(sliderOptions, "cameraTargetX", -50, 50).name("Target X").listen();
+cameraTarget.add(sliderOptions, "cameraTargetY", 0, 100).name("Target Y").listen();
+cameraTarget.add(sliderOptions, "cameraTargetZ", -50, 50).name("Target Z").listen();
 cameraTarget.open();
 
 const useSliders = function(){
     
     //lightPosition
-    hemiLight.position.set(sliderOptions.lightPositionX, sliderOptions.lightPositionY, sliderOptions.lightPositionZ);
-    
-    //lightDirection
-    dirLight.position.set(sliderOptions.lightDirectionX, sliderOptions.lightDirectionY, sliderOptions.lightDirectionZ);
+    hemiLightDay.position.set(sliderOptions.lightPositionX, sliderOptions.lightPositionY, sliderOptions.lightPositionZ);
+    dirLight.position.set(sliderOptions.lightPositionX, sliderOptions.lightPositionY, sliderOptions.lightPositionZ);
     
     if(sliderOptions.changeFreely){
         camera.position.set(sliderOptions.cameraPositionX, sliderOptions.cameraPositionY, sliderOptions.cameraPositionZ);
         camera.lookAt(sliderOptions.cameraTargetX, sliderOptions.cameraTargetY, sliderOptions.cameraTargetZ);
+        spotLight.position.set(sliderOptions.spotLightPositionX, sliderOptions.spotLightPositionY, sliderOptions.spotLightPositionZ);
+        spotLight.target.position.set(sliderOptions.spotLightTargetX, sliderOptions.spotLightTargetY, sliderOptions.spotLightTargetZ);
+        spotLight.target.updateMatrixWorld();
     }
 }
+
+// LIGHTS
+
+const hemiLightDay = new THREE.HemisphereLight(0xffffff, 0x444444);
+hemiLightDay.position.set(0, 200, 0);
+scene.add(hemiLightDay);
+
+const dirLight = new THREE.DirectionalLight(0xffffff);
+dirLight.position.set(0, 200, 100);
+dirLight.castShadow = true;
+dirLight.shadow.camera.top = 180;
+dirLight.shadow.camera.bottom = -100;
+dirLight.shadow.camera.left = -120;
+dirLight.shadow.camera.right = 120;
+scene.add(dirLight);
+
+const hemiLightNight = new THREE.HemisphereLight(0xffffff, 0x444444, 0.1);
+hemiLightNight.position.set(0, 200, 0);
+//scene.add(hemiLightNight);
+
+let spotLight = new THREE.SpotLight( 0xffffff, 0.8 );
+spotLight.position.set( 0, 10, 0 );
+spotLight.target.position.set( 0, 0, 0 );
+spotLight.target.updateMatrixWorld();
+spotLight.angle = Math.PI / 8;
+spotLight.penumbra = 1;
+spotLight.decay = 2;
+spotLight.distance = 50;
+
+spotLight.intensity = 3;
+
+spotLight.castShadow = true;
+spotLight.shadow.mapSize.width = 512;
+spotLight.shadow.mapSize.height = 512;
+spotLight.shadow.camera.near = 10;
+spotLight.shadow.camera.far = 200;
+spotLight.shadow.focus = 1;
+//scene.add( spotLight );
+
+// LIGHTS END
+
 
 // COLLADA BEGINS
 const loadingManager = new THREE.LoadingManager(function() {
@@ -159,7 +235,7 @@ const loadingManager = new THREE.LoadingManager(function() {
     scene.add(ghost2);
     scene.add(maze);
     scene.add(cube);
-    // scene.add(plane);
+    scene.add(plane);
 });
 
 const loader = new ColladaLoader(loadingManager);
@@ -195,6 +271,8 @@ let maze_mat = new Maze();
 
 // barrel
 var barrels = [];
+var barrel_updownTheta = [];
+var barrel_rotationTheta = [];
 for (var vertex of maze_mat.graph.getVertices()) {
     let passNode = Math.random() < 0.5;
     if (passNode) {
@@ -203,26 +281,17 @@ for (var vertex of maze_mat.graph.getVertices()) {
     let worldLoc = maze_mat.mazeLoc2worldLoc(vertex);
     loader.load("models/barrel.dae", function(collada) {
         collada.scene.position.x += worldLoc.x;
-        collada.scene.position.y += 0;
+        collada.scene.position.y += 0.5;
         collada.scene.position.z += worldLoc.z;
         barrels.push(collada.scene);
-        scene.add(collada.scene);
+        barrel_updownTheta.push(Math.floor(Math.random() * 180));
+        barrel_rotationTheta.push(Math.floor(Math.random() * 180));
+        scene.add(collada.scene)
     });
 }
 // COLLADA END
 
-const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444);
-hemiLight.position.set(0, 200, 0);
-scene.add(hemiLight);
 
-const dirLight = new THREE.DirectionalLight(0xffffff);
-dirLight.position.set(0, 200, 100);
-dirLight.castShadow = true;
-dirLight.shadow.camera.top = 180;
-dirLight.shadow.camera.bottom = -100;
-dirLight.shadow.camera.left = -120;
-dirLight.shadow.camera.right = 120;
-scene.add(dirLight);
 
 // Game Logic
 var update = function() {};
@@ -430,14 +499,31 @@ function moveRight() {
     BallObject.resetMotion();
 }
 
+
+let score = 0;
+
 var GameLoop = function() {
     requestAnimationFrame(GameLoop);
+    
+    // random barrel movements 
+    for (let b = 0; b < barrels.length; b++) {
+        barrels[b].position.y = Math.abs(Math.sin(degToRad(barrel_updownTheta[b])))/10+0.5;
+        barrels[b].rotation.x = barrel_rotationTheta[b];
+        barrels[b].rotation.y = barrel_rotationTheta[b];
+        barrels[b].rotation.z = barrel_rotationTheta[b];
+        
+        barrel_updownTheta[b] = (barrel_updownTheta[b] + 5)%360;
+        barrel_rotationTheta[b] = (barrel_rotationTheta[b] + 0.01)%360;
+    }
+    
+    //request pointer lock when game start, exit pointer lock when game paused
     if(changed){
         if(gameCondition === 2 ){
             canvas.requestPointerLock();
         }
         else{
             document.exitPointerLock();
+            
         }
         setChanged(0);
     }
@@ -459,7 +545,7 @@ var GameLoop = function() {
             }
             if (isPressS) {
                 moveBackward();
-                if (collisionCheckSystemWithMachineLearningAndDeepLearning() == true)
+                if (collisionCheckSystemWithMachineLearningAndDeepLearning() === true)
                     moveForward();
                 // ball.position.x -= speed * Math.cos(degToRad(rotation_angleX));
                 // ball.position.z -= speed * Math.sin(degToRad(rotation_angleX));
@@ -469,7 +555,7 @@ var GameLoop = function() {
             }
             if (isPressA) {
                 moveLeft();
-                if (collisionCheckSystemWithMachineLearningAndDeepLearning() == true)
+                if (collisionCheckSystemWithMachineLearningAndDeepLearning() === true)
                     moveRight();
                 // ball.position.x += speed * Math.sin(degToRad(rotation_angleX));
                 // ball.position.z -= speed * Math.cos(degToRad(rotation_angleX));
@@ -479,7 +565,7 @@ var GameLoop = function() {
             }
             if (isPressD) {
                 moveRight();
-                if (collisionCheckSystemWithMachineLearningAndDeepLearning() == true)
+                if (collisionCheckSystemWithMachineLearningAndDeepLearning() === true)
                     moveLeft();
 
                 // ball.position.x -= speed * Math.sin(degToRad(rotation_angleX));
@@ -498,7 +584,11 @@ var GameLoop = function() {
         GhostObject.resetMotion();
         GhostObject2.action();
         GhostObject2.resetMotion();
-
+        
+        
+        document.getElementById("scoreboard").textContent = "Score: "+ score;
+        
+        
         if(!sliderOptions.changeFreely){
             camera.position.x =
                 ball.position.x - current_radius * Math.cos(degToRad(rotation_angleX));
@@ -507,7 +597,23 @@ var GameLoop = function() {
             camera.position.y =
                 ball.position.y + current_radius * Math.sin(degToRad(rotation_angleY));
             camera.lookAt(ball.position.x, ball.position.y, ball.position.z);
+            
+            if(sliderOptions.spotLightFromAbove){
+                spotLight.position.set(ball.position.x, ball.position.y + 10, ball.position.z);
+                spotLight.target.position.set(ball.position.x, ball.position.y, ball.position.z);
+                spotLight.distance = 50;
+            }
+            else{
+                spotLight.position.set(ball.position.x, ball.position.y, ball.position.z);
+                spotLight.target.position.x = ball.position.x + (ball.position.x - camera.position.x);
+                spotLight.target.position.y = ball.position.y - 0.1;
+                spotLight.target.position.z = ball.position.z + (ball.position.z - camera.position.z);
+                spotLight.distance = 50;
+            }
+            spotLight.target.updateMatrixWorld();
+            
         }
+        
         
         // corner check
         //let corner = maze_mat.corner_check(ball.position.x, ball.position.z);

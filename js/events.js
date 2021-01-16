@@ -1,3 +1,6 @@
+document.querySelector("body").style.alignItems = "center";
+document.querySelector("body").style.justifyContent = "center";
+
 function addElement(elementId) {
     let element = document.getElementById(elementId);
     element.parentNode.parentNode.remove();
@@ -115,7 +118,6 @@ function addStartMenu(){
 
 function addPauseMenu(){
     const body = document.querySelector("body");
-        
     let element = document.createElement("div");
     element.id = "logoAndMenu";
     element.innerHTML = `
@@ -134,12 +136,11 @@ function addPauseMenu(){
         <button id ="highScores" class="menuButton">High Scores</button>
         <button id ="controls" class="menuButton">Controls</button>
       </div>`;
-
     body.appendChild(element);
         
 }
 
-function enterNickNameMenu(){
+function enterNickNameMenu(score){
     const body = document.querySelector("body");
         
     let element = document.createElement("div");
@@ -147,6 +148,7 @@ function enterNickNameMenu(){
     element.innerHTML = `
       <div id="finishedGame">
         <div class="name">GAME OVER</div>
+        <div class="yourScore">Your score: ${score}</div>
         <form id = "todo-form" name="form">
             <input class="form-control" type="text" name="nickname" id = "nickname" placeholder="Enter a Nickname">
             <button class="menuButton addButton">Add to Table</button>
@@ -155,4 +157,22 @@ function enterNickNameMenu(){
 
     body.appendChild(element);
     addToStorage();
+}
+
+function addScoreboard(){
+    
+    document.querySelector("body").style.alignItems = "";
+    document.querySelector("body").style.justifyContent = "";
+    
+    let element = document.createElement("div");
+    element.id = "scoreboard";
+    element.innerHTML = `Score: 0`;
+
+    document.querySelector("body").appendChild(element);
+}
+function removeScoreboard(){
+    document.querySelector("body").style.alignItems = "center";
+    document.querySelector("body").style.justifyContent = "center";
+    
+    console.log(document.getElementById("scoreboard"));
 }

@@ -34,10 +34,10 @@ let degToRad = function (degree) {
     return (degree * Math.PI) / 180;
 };
 
-function gameOver(){
-    if(gameCondition === 4){
-        enterNickNameMenu();
-    }
+function gameOver(score){
+    gameCondition = 4;
+    changed = 1;
+    enterNickNameMenu(score);
 };
 
 document.addEventListener("click",function(e){
@@ -45,6 +45,7 @@ document.addEventListener("click",function(e){
         gameCondition = 1;
         changed = 1;
         removeElement("playButton");
+        addScoreboard();
     }
     if(e.target.id === "restartButton"){
         window.location.reload(false);
@@ -72,14 +73,15 @@ document.addEventListener("click",function(e){
 });
 document.onkeydown = function (e) {
     if((e.key === "p" || e.key === "P")){
-        
         if(gameCondition === 2){
+            removeScoreboard();
             // add pause screen
             gameCondition = 3;
             changed = 1;
             addPauseMenu();
         }
         else if (gameCondition === 3){
+            addScoreboard();
             // remove pause screen and continue
             gameCondition = 2;
             changed = 1;
@@ -91,8 +93,7 @@ document.onkeydown = function (e) {
         }
     }
     if((e.key === "q" || e.key === "Q") && gameCondition === 2){
-        gameCondition = 4;
-        changed = 1;
+        removeScoreboard();
         gameOver();
     }
 };
@@ -154,5 +155,7 @@ var updateCameraAfterStart = function (camera, ball) {
         camera.lookAt(ball.position.x, ball.position.y, ball.position.z);
     }
 };
+
+
 
 export { gameCondition, changed, radius, setGameCondition, setChanged, updateCameraInStart, degToRad };
