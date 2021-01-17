@@ -15,9 +15,11 @@ var scene = new THREE.Scene();
 let ball;
 let ghost1;
 let ghost2;
+let ghost3;
 let BallObject;
 let GhostObject;
 let GhostObject2;
+let GhostObject3;
 
 let maze;
 var camera = new THREE.PerspectiveCamera(
@@ -344,6 +346,7 @@ const loadingManager = new THREE.LoadingManager(function() {
     scene.add(ball);
     scene.add(ghost1);
     scene.add(ghost2);
+    scene.add(ghost3);
     scene.add(maze);
     scene.add(cube);
     scene.add(plane);
@@ -355,24 +358,43 @@ loader.load("models/sphere.dae", function(collada) {
     collada.scene.position.y += 0.5;
     collada.scene.position.z += 0;
     ball = collada.scene;
-    BallObject = new Movable(ball);
+    BallObject = new Movable(ball, true, false);
 });
 
-loader.load("models/ghost.dae", function(collada) {
+var newPath_counter = 0;
+loader.load("models/ghost_red.dae", function(collada) {
     collada.scene.position.x += 14;
     collada.scene.position.y += 0.75;
     collada.scene.position.z += -14;
+    collada.scene.rotation.z = degToRad(180);
     ghost1 = collada.scene;
-    GhostObject = new Movable(ghost1);
+    GhostObject = new Movable(ghost1, false, true);
+    GhostObject.path = maze_mat.graph.shortest_path(
+        GhostObject.get_mazeCoord(maze_mat),
+        BallObject.get_mazeCoord(maze_mat)
+    );
 });
 
-loader.load("models/ghost2.dae", function(collada) {
+loader.load("models/ghost_green.dae", function(collada) {
     collada.scene.position.x += 14;
     collada.scene.position.y += 0.75;
     collada.scene.position.z += 14;
+    collada.scene.rotation.z = degToRad(180);
     ghost2 = collada.scene;
-    GhostObject2 = new Movable(ghost2);
+    GhostObject2 = new Movable(ghost2, false, true);
+    GhostObject2.path = maze_mat.getRightPath();
 });
+
+loader.load("models/ghost_blue.dae", function(collada) {
+    collada.scene.position.x += -14;
+    collada.scene.position.y += 0.75;
+    collada.scene.position.z += -14;
+    collada.scene.rotation.z = degToRad(180);
+    ghost3 = collada.scene;
+    GhostObject3 = new Movable(ghost3, false, true);
+    GhostObject3.path = maze_mat.getLeftPath();
+});
+
 
 loader.load("models/pacman_maze_cubes.dae", function(collada) {
     collada.scene.position.y += 0;
@@ -926,8 +948,32 @@ var GameLoop = function() {
                 // ball.rotation.x = angleY * (Math.PI / 180);
             }
         }
+
+        if ((newPath_counter >= 100 && !GhostObject.isCommand_continue) || GhostObject.path.length == 0) {
+            console.log("new path calculating");
+            let current_command = GhostObject.path[0];
+            GhostObject.path = maze_mat.graph.shortest_path(
+                GhostObject.get_mazeCoord(maze_mat),
+                BallObject.get_mazeCoord(maze_mat));
+            
+            // if (current_command != undefined) {
+            //     GhostObject.path.unshift(current_command);
+            // }
+            newPath_counter = 0
+        }
+        else{
+            newPath_counter++;
+        }
+
         GhostObject.execute_thePath();
         GhostObject2.execute_thePath();
+        GhostObject3.execute_thePath();
+        if (GhostObject2.path.length == 0) {
+            GhostObject2.path = maze_mat.getRightPath();
+        }
+        if (GhostObject3.path.length == 0) {
+            GhostObject3.path = maze_mat.getLeftPath();
+        }
         let barrelsCollisionCheckResult = collisionCheckForBarrels();
         if (
             collisionCheckForTwoSpheres(
@@ -949,6 +995,16 @@ var GameLoop = function() {
         ) {
             console.log("ghost2 collision!");
             gameOver();
+        } else if (
+            collisionCheckForTwoSpheres(
+                BallObject.object,
+                GhostObject3.object,
+                0.5,
+                0.75
+            ) == true
+        ) {
+            console.log("ghost3 collision!");
+            gameOver();
         } else if (barrelsCollisionCheckResult != -23) {
             barrels[barrelsCollisionCheckResult]["visible"] = false;
             score++;
@@ -960,6 +1016,8 @@ var GameLoop = function() {
         GhostObject.resetMotion();
         GhostObject2.action();
         GhostObject2.resetMotion();
+        GhostObject3.action();
+        GhostObject3.resetMotion();
 
         document.getElementById("scoreboard").textContent = "Score: " + score;
 

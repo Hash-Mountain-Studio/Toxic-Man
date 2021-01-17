@@ -1,37 +1,39 @@
 class Movable {
-    constructor(object) {
+    constructor(object, rotateWhile_move, flying) {
         this.object = object;
         this.speed = { x: 0, y: 0, z: 0 };
-        this.angle = { x: 0, y: 0, z: 0 };
+        this.angle = { x: object.position.x, y: object.position.y, z: object.position.z };
         this.old_position = {
             x: object.position.x,
             y: object.position.y,
             z: object.position.z,
         };
-        this.auto_speed = 0.2;
+        this.auto_speed = 0.1;
         this.isCommand_continue = false;
-        this.path;
+        this.path = [];
+        this.rotateWhile_move = rotateWhile_move;
+        this.prev_command = "back";
+        this.flying = flying;
+        this.fly_theta = 0;
     }
 
     action() {
         // translation
         this.object.position.x += this.speed.x;
         this.object.position.z += this.speed.z;
+        if (this.flying) {
+            this.object.position.y = Math.abs(Math.sin(degToRad(this.fly_theta)))/5+1;
+            this.fly_theta = (this.fly_theta + 5)%360
+        }
 
         this.object.position.x = Math.round(this.object.position.x * 100) / 100;
         this.object.position.z = Math.round(this.object.position.z * 100) / 100;
 
         // rotation
-        this.object.rotation.z = 2 * this.angle.z * (Math.PI / 180);
-        this.object.rotation.x = this.angle.x * (Math.PI / 180);
-    }
-
-    /*
-          this function first moves along x-axis (columns in maze matrix)
-          then moves along z-axis (rows in maze matrix)
-          */
-    moveTo(maze, dest_col, dest_row) {
-        console.log(this.get_mazeCoord(maze));
+        if (this.rotateWhile_move) {
+            this.object.rotation.z = 2 * this.angle.z * (Math.PI / 180);
+            this.object.rotation.x = this.angle.x * (Math.PI / 180);                
+        }
     }
 
     oneStepForward() {
@@ -99,6 +101,9 @@ class Movable {
             return;
         }
         let command = this.path[0];
+        if (command != this.prev_command) {
+            this.turn_around(command);
+        }
         if (command == "forward") {
             this.isCommand_continue = this.oneStepForward();
         } else if (command == "back") {
@@ -109,7 +114,7 @@ class Movable {
             this.isCommand_continue = this.oneStepRight();
         }
         if (!this.isCommand_continue && this.path.length != 0) {
-            this.path.shift();
+            this.prev_command = this.path.shift();
         }
     }
 
@@ -123,6 +128,9 @@ class Movable {
     }
 
     rotation(x, y, z) {
+        if (!this.rotateWhile_move) {
+            return;
+        }
         this.angle.x += x;
         this.angle.y += y;
         this.angle.z += z;
@@ -142,5 +150,35 @@ class Movable {
     get_mazeCoord(maze) {
         let loc = maze.localizer(this.object.position.x, this.object.position.z);
         return (loc.x - 1).toString() + ":" + (loc.z - 1).toString();
+    }
+
+    getAngle() {
+        var angle = Math.round(
+            radToDeg(Math.atan2(this.object.rotation.x, this.object.rotation.z))
+        );
+        if (angle < 0) {
+            angle = angle + 360;
+        }
+        if (angle == -0) {
+            angle = 0;
+        }
+    
+        return angle;
+    }
+
+    turn_around(direction){
+        if (direction == "forward") {
+            this.object.rotation.z = degToRad(0);
+        }
+        else if (direction == "back") {
+            this.object.rotation.z = degToRad(180);
+        }
+        else if (direction == "left") {
+            this.object.rotation.z = degToRad(90);
+        }
+        else if (direction == "right") {
+            this.object.rotation.z = degToRad(270);
+        }
+
     }
 }
