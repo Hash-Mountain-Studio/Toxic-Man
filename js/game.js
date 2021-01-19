@@ -20,7 +20,9 @@ let ball;
 let ghost1;
 let ghost2;
 let ghost3;
-let power_ups = new Map();
+let wings;
+let hammer;
+let hammerDown;
 let BallObject;
 let GhostObject;
 let GhostObject2;
@@ -447,7 +449,7 @@ loader.load("models/hammer.dae", function(collada) {
     collada.scene.position.y += 1;
     collada.scene.position.z += -10;
     // collada.scene.rotation.z = degToRad(270);
-    power_ups.set("hammer",collada.scene);
+    hammer = collada.scene;
     scene.add(collada.scene);
 
 });
@@ -457,7 +459,7 @@ loader.load("models/wings.dae", function(collada) {
     collada.scene.position.y += 1;
     collada.scene.position.z += 10;
     // collada.scene.rotation.z = degToRad(270);
-    power_ups.set("wings",collada.scene);
+    wings = collada.scene;
     scene.add(collada.scene);
 });
 
@@ -515,6 +517,7 @@ let isPressW = false;
 let isPressS = false;
 let isPressA = false;
 let isPressD = false;
+let isSpace = false;
 
 document.addEventListener("keydown", function(e) {
     switch (e.key) {
@@ -534,21 +537,9 @@ document.addEventListener("keydown", function(e) {
         case "D":
             isPressD = true;
             break;
-        case "x":
-        case "X":
-            // call the green ghost
-            GhostObject2.path = maze_mat.graph.shortest_path(
-                GhostObject2.get_mazeCoord(maze_mat),
-                BallObject.get_mazeCoord(maze_mat)
-            );
-            break;
-        case "z":
-        case "Z":
-            // call the red ghost
-            GhostObject.path = maze_mat.graph.shortest_path(
-                GhostObject.get_mazeCoord(maze_mat),
-                BallObject.get_mazeCoord(maze_mat)
-            );
+        case " ":
+            // space
+            isSpace = true;
             break;
     }
 });
@@ -571,6 +562,11 @@ document.addEventListener("keyup", function(e) {
         case "D":
             isPressD = false;
             break;
+        case " ":
+            // space
+            isSpace = false;
+            break;
+
     }
 });
 let speed = 0.1;
@@ -721,6 +717,8 @@ function collisionCheckForBarrels() {
     return -23;
 }
 
+let using_powerUp = "";
+let hammerDownSpeed = 10;
 function collisionCheckForPowerUps() {
     // Sphere Coordinates
     let sx = ball.position.x;
@@ -728,29 +726,59 @@ function collisionCheckForPowerUps() {
     let sz = ball.position.z;
     let radius = 0.5;
 
+    let isWings = false;
+    let isHammer = false;
+    // wings Coordinates
+    let cx = wings["position"]["x"];
+    let cy = wings["position"]["y"];
+    let cz = wings["position"]["z"];
+    let wingsRadius = 0.2;
+    if (
+        cx - wingsRadius - radius < sx &&
+        sx <= cx + wingsRadius + radius &&
+        cz - wingsRadius - radius <= sz &&
+        sz <= cz + wingsRadius + radius &&
+        wings["visible"] === true
+    ) {
+        isWings = true;
+    }
 
-    var keys = power_ups.keys();
-
-    for(var key of keys){
-        let currentPower = power_ups.get(key);
-        // Cube Coordinates
-        let cx = currentPower["position"]["x"];
-        let cy = currentPower["position"]["y"];
-        let cz = currentPower["position"]["z"];
-        let barrelRadius = 0.2;
-        if (
-            cx - barrelRadius - radius < sx &&
-            sx <= cx + barrelRadius + radius &&
-            cz - barrelRadius - radius <= sz &&
-            sz <= cz + barrelRadius + radius &&
-            currentPower["visible"] === true
-        ) {
-            //console.log(key+" colission");
-            return key;
+    // hammer Coordinates
+    cx = hammer["position"]["x"];
+    cy = hammer["position"]["y"];
+    cz = hammer["position"]["z"];
+    let hammerRadius = 0.2;
+    if (
+        cx - hammerRadius - radius < sx &&
+        sx <= cx + hammerRadius + radius &&
+        cz - hammerRadius - radius <= sz &&
+        sz <= cz + hammerRadius + radius &&
+        hammer["visible"] === true
+    ) {
+        isHammer = true;
+    }
+    if (isHammer) {
+        if (using_powerUp == "wings") {
+            return wings;
+        }
+        else{
+            using_powerUp = "hammer";
+            return hammer;
         }
     }
-    return "";
+    if (isWings) {
+        if (using_powerUp == "hammer") {
+            return hammer;
+        }
+        else{
+            using_powerUp = "wings";
+            return wings;
+        }
+    }
+    using_powerUp = "";
+    return null;
 }
+
 
 function moveForward() {
     BallObject.speedUp(
@@ -1010,7 +1038,7 @@ function objectTranslation(obj, angleFix, positionFixY, positionFixZ){
     obj.scale.set(0.75,0.75,0.75) ;
     obj.position.set(ball.position.x, ball.position.y+positionFixY, ball.position.z);
     obj.rotation.x = -Math.PI/2;
-    obj.rotation.y = 0;
+    // obj.rotation.y = 0;
     obj.rotation.z = - degToRad(rotation_angleX)+ degToRad(angleFix);
     //console.log(obj)
 }
@@ -1054,20 +1082,20 @@ var GameLoop = function() {
     }
 
     useSliders();
-    if(ball){
-        let powerup = collisionCheckForPowerUps()
-        //console.log(powerup);
-        if (powerup !== "") {
+    if(ball && wings && hammer){
+        let powerObject = collisionCheckForPowerUps()
+        //console.log(using_powerUp);
+        if (using_powerUp !== "") {
             setCanFocus(1);
             if(focus){
                 if(!isFocus){
                     //camera.position.set(ball.position.x, ball.position.y+3, ball.position.z-2);
-                    power_ups.get(powerup).position.y += 2;
-                    camera.lookAt(power_ups.get(powerup).position);
+                    powerObject.position.y += 2;
+                    camera.lookAt(powerObject.position);
                 }
                 isFocus=1;
                 isCollision=1;
-                objectRotation(power_ups.get(powerup));
+                objectRotation(powerObject);
             }
             else{
                 if(isFocus){
@@ -1075,16 +1103,40 @@ var GameLoop = function() {
                     isFocus=0;
                 }
                 if(isCollision){
-                    if(powerup=== "wings"){
-                        objectTranslation(power_ups.get(powerup), 90, 0);
+                    if(using_powerUp=== "wings"){
+                        objectTranslation(powerObject, 90, 0);
                     }
-                    if(powerup=== "hammer"){
-                        objectTranslation(power_ups.get(powerup), 0, 1);
+                    if(using_powerUp=== "hammer"){
+                        objectTranslation(powerObject, 0, 1);
+                    }
+                    if (isSpace) {
+                        if (using_powerUp == "hammer") {
+                            hammerDown = true;
+                        }
+                        // else if (using_powerUp == "wings") {
+                        //     speed = 0.2;
+                        // }
+                    }
+        
+                    if (hammerDown) {
+                        if (hammer.rotation.y >= degToRad(90)) {
+                            hammerDownSpeed = -hammerDownSpeed;
+                        }
+                        if (hammer.rotation.y < degToRad(0)) {
+                            console.log(hammer.rotation.y);
+        
+                            hammer.rotation.y = Math.round(degToRad(0)*100)/100;
+                            hammerDownSpeed = -hammerDownSpeed;
+                            console.log(hammer.rotation.y);
+                            hammerDown = false; 
+                        }
+                        hammer.rotation.y  += degToRad(hammerDownSpeed)
+                        hammer.rotation.y = Math.round(hammer.rotation.y * 100) / 100;
                     }
                 }
             }
-        }
-    }
+        }  
+    }  
     if (gameCondition === 2 && ball && !focus) {
         if (collisionCheckForMaze() === false) {
             if (isPressW) {

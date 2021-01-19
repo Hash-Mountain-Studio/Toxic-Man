@@ -8,7 +8,7 @@ class Movable {
             y: object.position.y,
             z: object.position.z,
         };
-        this.auto_speed = 0.1;
+        this.auto_speed = 0.08;
         this.isCommand_continue = false;
         this.path = [];
         this.rotateWhile_move = rotateWhile_move;
