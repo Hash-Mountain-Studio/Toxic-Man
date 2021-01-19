@@ -16,6 +16,8 @@ let radiusDistance;
 let gameCondition = 0;
 
 let changed = 0;
+let focus = 0;
+let canFocus = 0;
 
 function setGameCondition(condition) {
     gameCondition = condition;
@@ -24,6 +26,10 @@ function setGameCondition(condition) {
 
 function setChanged(val) {
     changed = val;
+}
+
+function setCanFocus(val) {
+    canFocus = val;
 }
 
 let radToDeg = function(radian) {
@@ -101,6 +107,9 @@ document.onkeydown = function(e) {
     if ((e.key === "q" || e.key === "Q") && gameCondition === 2) {
         gameOver();
     }
+    if ((e.key === "c" || e.key === "C") && gameCondition === 2 && canFocus) {
+        focus = !focus
+    }
 };
 
 let startPosition = function(value, distance, startValue, range) {
@@ -163,10 +172,13 @@ export {
     gameCondition,
     changed,
     radius,
+    focus,
+    canFocus,
     setGameCondition,
     setChanged,
+    setCanFocus,
     updateCameraInStart,
     degToRad,
     gameOver,
-    youWon
+    youWon,
 };

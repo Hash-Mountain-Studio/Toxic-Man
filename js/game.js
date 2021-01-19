@@ -4,8 +4,11 @@ import {
     gameCondition,
     changed,
     radius,
+    focus,
+    canFocus,
     setGameCondition,
     setChanged,
+    setCanFocus,
     updateCameraInStart,
     degToRad,
     gameOver,
@@ -62,6 +65,8 @@ wallTexture.wrapS = THREE.RepeatWrapping;
 wallTexture.wrapT = THREE.RepeatWrapping;
 wallTexture.rotation = degToRad(90);
 wallTexture.repeat.set( 2, 2 );
+
+const oildrumTexture = new THREE.TextureLoader().load( "oildrum_col.png" );
 
 // THREE.JS PLANE
 const plane_geometry = new THREE.PlaneGeometry(32, 32, 8, 8);
@@ -740,7 +745,7 @@ function collisionCheckForPowerUps() {
             sz <= cz + barrelRadius + radius &&
             currentPower["visible"] === true
         ) {
-            console.log(key+" colission");
+            //console.log(key+" colission");
             return key;
         }
     }
@@ -807,6 +812,7 @@ function makeToonShading() {
 
     let materialGreenToonShading = new THREE.MeshToonMaterial({
         color: 0x00ff58,
+        map: groundTexture,
     });
 
     let materialPurpleToonShading = new THREE.MeshToonMaterial({
@@ -996,15 +1002,26 @@ audioLoader.load("sounds/main-theme.mp3", function(buffer) {
 });
 
 let oneTimes = 1;
+let isFocus = 0;
+let isCollision = 0;
 //let specificBarrel;
 
-function objectTranslation(obj){
-    obj.position.set(ball.position.x, ball.position.y+1, ball.position.z);
+function objectTranslation(obj, angleFix, positionFixY, positionFixZ){
+    obj.scale.set(0.75,0.75,0.75) ;
+    obj.position.set(ball.position.x, ball.position.y+positionFixY, ball.position.z);
+    obj.rotation.x = -Math.PI/2;
+    obj.rotation.y = 0;
+    obj.rotation.z = - degToRad(rotation_angleX)+ degToRad(angleFix);
+    //console.log(obj)
+}
+
+function objectRotation(obj){
     obj.rotation.x += sliderOptions.rotationObjX;
     obj.rotation.y += sliderOptions.rotationObjY;
     obj.rotation.z += sliderOptions.rotationObjZ;
-    console.log(obj)
+    //console.log(obj)
 }
+
 var GameLoop = function() {
     requestAnimationFrame(GameLoop);
 
@@ -1039,11 +1056,36 @@ var GameLoop = function() {
     useSliders();
     if(ball){
         let powerup = collisionCheckForPowerUps()
-        if (powerup != "") {
-            objectTranslation(power_ups.get(powerup));
+        //console.log(powerup);
+        if (powerup !== "") {
+            setCanFocus(1);
+            if(focus){
+                if(!isFocus){
+                    //camera.position.set(ball.position.x, ball.position.y+3, ball.position.z-2);
+                    power_ups.get(powerup).position.y += 2;
+                    camera.lookAt(power_ups.get(powerup).position);
+                }
+                isFocus=1;
+                isCollision=1;
+                objectRotation(power_ups.get(powerup));
+            }
+            else{
+                if(isFocus){
+                    setCanFocus(0);
+                    isFocus=0;
+                }
+                if(isCollision){
+                    if(powerup=== "wings"){
+                        objectTranslation(power_ups.get(powerup), 90, 0);
+                    }
+                    if(powerup=== "hammer"){
+                        objectTranslation(power_ups.get(powerup), 0, 1);
+                    }
+                }
+            }
         }
     }
-    if (gameCondition === 2 && ball) {
+    if (gameCondition === 2 && ball && !focus) {
         if (collisionCheckForMaze() === false) {
             if (isPressW) {
                 moveForward();
@@ -1084,7 +1126,8 @@ var GameLoop = function() {
             }
         }
 
-        if ((newPath_counter >= 100 && !GhostObject.isCommand_continue) || GhostObject.path.length == 0) {
+        if(!focus){
+            if ((newPath_counter >= 100 && !GhostObject.isCommand_continue) || GhostObject.path.length == 0) {
             // console.log("new path calculating");
             let current_command = GhostObject.path[0];
             GhostObject.path = maze_mat.graph.shortest_path(
@@ -1095,73 +1138,74 @@ var GameLoop = function() {
             //     GhostObject.path.unshift(current_command);
             // }
             newPath_counter = 0
-        }
-        else{
-            newPath_counter++;
-        }
+            }
+            else{
+                newPath_counter++;
+            }
+            GhostObject.execute_thePath();
+            GhostObject2.execute_thePath();
+            GhostObject3.execute_thePath();
+            if (GhostObject2.path.length == 0) {
+                GhostObject2.path = maze_mat.getRightPath();
+            }
+            if (GhostObject3.path.length == 0) {
+                GhostObject3.path = maze_mat.getLeftPath();
+            }
+            let barrelsCollisionCheckResult = collisionCheckForBarrels();
+            if (
+                collisionCheckForTwoSpheres(
+                    BallObject.object,
+                    GhostObject.object,
+                    0.5,
+                    0.75
+                ) == true
+            ) {
+                console.log("ghost1 collision!");
+                gameOver();
+            } else if (
+                collisionCheckForTwoSpheres(
+                    BallObject.object,
+                    GhostObject2.object,
+                    0.5,
+                    0.75
+                ) == true
+            ) {
+                console.log("ghost2 collision!");
+                gameOver();
+            } else if (
+                collisionCheckForTwoSpheres(
+                    BallObject.object,
+                    GhostObject3.object,
+                    0.5,
+                    0.75
+                ) == true
+            ) {
+                console.log("ghost3 collision!");
+                gameOver();
+            } else if (barrelsCollisionCheckResult != -23) {
+                //specificBarrel = barrels[barrelsCollisionCheckResult];
+                barrels[barrelsCollisionCheckResult]["visible"] = false;
 
-        GhostObject.execute_thePath();
-        GhostObject2.execute_thePath();
-        GhostObject3.execute_thePath();
-        if (GhostObject2.path.length == 0) {
-            GhostObject2.path = maze_mat.getRightPath();
-        }
-        if (GhostObject3.path.length == 0) {
-            GhostObject3.path = maze_mat.getLeftPath();
-        }
-        let barrelsCollisionCheckResult = collisionCheckForBarrels();
-        if (
-            collisionCheckForTwoSpheres(
-                BallObject.object,
-                GhostObject.object,
-                0.5,
-                0.75
-            ) == true
-        ) {
-            console.log("ghost1 collision!");
-            gameOver();
-        } else if (
-            collisionCheckForTwoSpheres(
-                BallObject.object,
-                GhostObject2.object,
-                0.5,
-                0.75
-            ) == true
-        ) {
-            console.log("ghost2 collision!");
-            gameOver();
-        } else if (
-            collisionCheckForTwoSpheres(
-                BallObject.object,
-                GhostObject3.object,
-                0.5,
-                0.75
-            ) == true
-        ) {
-            console.log("ghost3 collision!");
-            gameOver();
-        } else if (barrelsCollisionCheckResult != -23) {
-            //specificBarrel = barrels[barrelsCollisionCheckResult];
-            barrels[barrelsCollisionCheckResult]["visible"] = false;
+                //objectTranslation(specificBarrel);
+                score++;
+            }
             
-            //objectTranslation(specificBarrel);
-            score++;
+            BallObject.action();
+            BallObject.resetMotion();
+            GhostObject.action();
+            GhostObject.resetMotion();
+            GhostObject2.action();
+            GhostObject2.resetMotion();
+            GhostObject3.action();
+            GhostObject3.resetMotion();
+
+            if(gameCondition !==4 && gameCondition !== 5){
+                document.getElementById("scoreboard").textContent = "Score: " + score;
+            }
         }
 
-        BallObject.action();
-        BallObject.resetMotion();
-        GhostObject.action();
-        GhostObject.resetMotion();
-        GhostObject2.action();
-        GhostObject2.resetMotion();
-        GhostObject3.action();
-        GhostObject3.resetMotion();
-
-        if(gameCondition !==4 && gameCondition !== 5){
-            document.getElementById("scoreboard").textContent = "Score: " + score;
-        }
-
-        if (!sliderOptions.changeFreely) {
+        if (!sliderOptions.changeFreely && !focus) {
+            
             camera.position.x =
                 ball.position.x - current_radius * Math.cos(degToRad(rotation_angleX));
             camera.position.z =
