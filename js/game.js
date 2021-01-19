@@ -17,6 +17,7 @@ let ball;
 let ghost1;
 let ghost2;
 let ghost3;
+let power_ups = new Map();
 let BallObject;
 let GhostObject;
 let GhostObject2;
@@ -49,14 +50,14 @@ window.addEventListener("resize", function() {
 
 //texture
 const groundTexture = new THREE.TextureLoader().load( "ground.png" );
-console.log(groundTexture);
+// console.log(groundTexture);
 groundTexture.wrapS = THREE.RepeatWrapping;
 groundTexture.wrapT = THREE.RepeatWrapping;
 groundTexture.repeat.set( 16, 16 );
 
 //texture
 const wallTexture = new THREE.TextureLoader().load( "wall.png" );
-console.log(wallTexture);
+// console.log(wallTexture);
 wallTexture.wrapS = THREE.RepeatWrapping;
 wallTexture.wrapT = THREE.RepeatWrapping;
 wallTexture.rotation = degToRad(90);
@@ -436,6 +437,24 @@ loader.load("models/ghost_blue.dae", function(collada) {
     GhostObject3.path = maze_mat.getLeftPath();
 });
 
+loader.load("models/hammer.dae", function(collada) {
+    collada.scene.position.x += -10;
+    collada.scene.position.y += 1;
+    collada.scene.position.z += -10;
+    // collada.scene.rotation.z = degToRad(270);
+    power_ups.set("hammer",collada.scene);
+    scene.add(collada.scene);
+
+});
+
+loader.load("models/wings.dae", function(collada) {
+    collada.scene.position.x += -10;
+    collada.scene.position.y += 1;
+    collada.scene.position.z += 10;
+    // collada.scene.rotation.z = degToRad(270);
+    power_ups.set("wings",collada.scene);
+    scene.add(collada.scene);
+});
 
 loader.load("models/pacman_maze_cubes.dae", function(collada) {
     collada.scene.position.y += 0;
@@ -695,6 +714,37 @@ function collisionCheckForBarrels() {
     }
 
     return -23;
+}
+
+function collisionCheckForPowerUps() {
+    // Sphere Coordinates
+    let sx = ball.position.x;
+    let sy = ball.position.y;
+    let sz = ball.position.z;
+    let radius = 0.5;
+
+
+    var keys = power_ups.keys();
+
+    for(var key of keys){
+        let currentPower = power_ups.get(key);
+        // Cube Coordinates
+        let cx = currentPower["position"]["x"];
+        let cy = currentPower["position"]["y"];
+        let cz = currentPower["position"]["z"];
+        let barrelRadius = 0.2;
+        if (
+            cx - barrelRadius - radius < sx &&
+            sx <= cx + barrelRadius + radius &&
+            cz - barrelRadius - radius <= sz &&
+            sz <= cz + barrelRadius + radius &&
+            currentPower["visible"] === true
+        ) {
+            console.log(key+" colission");
+            return key;
+        }
+    }
+    return "";
 }
 
 function moveForward() {
@@ -987,8 +1037,11 @@ var GameLoop = function() {
     }
 
     useSliders();
-    if(ball && score > 0){
-        objectTranslation(specificBarrel);
+    if(ball){
+        let powerup = collisionCheckForPowerUps()
+        if (powerup != "") {
+            objectTranslation(power_ups.get(powerup));
+        }
     }
     if (gameCondition === 2 && ball) {
         if (collisionCheckForMaze() === false) {
@@ -1032,7 +1085,7 @@ var GameLoop = function() {
         }
 
         if ((newPath_counter >= 100 && !GhostObject.isCommand_continue) || GhostObject.path.length == 0) {
-            console.log("new path calculating");
+            // console.log("new path calculating");
             let current_command = GhostObject.path[0];
             GhostObject.path = maze_mat.graph.shortest_path(
                 GhostObject.get_mazeCoord(maze_mat),
