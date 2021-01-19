@@ -131,6 +131,10 @@ var sliderOptions = {
     isDay: true,
     spotLightFromAbove: true,
 
+    rotationObjX: 0,
+    rotationObjY: 0,
+    rotationObjZ: 0,
+    
     lightPositionX: 50,
     lightPositionY: 200,
     lightPositionZ: 50,
@@ -212,6 +216,22 @@ shading
         setChecked("lambertShading");
         makeLambertShading();
     });
+
+var selectedOjectRotationSpeed = gui.addFolder("Obj Rotation Speed");
+selectedOjectRotationSpeed
+    .add(sliderOptions, "rotationObjX", -0.1, 0.1)
+    .name("Rotation Speed X")
+    .listen();
+selectedOjectRotationSpeed
+    .add(sliderOptions, "rotationObjY", -0.1, 0.1)
+    .name("Rotation Speed Y")
+    .listen();
+selectedOjectRotationSpeed
+    .add(sliderOptions, "rotationObjZ", -0.1, 0.1)
+    .name("Rotation Speed Z")
+    .listen();
+selectedOjectRotationSpeed.open();
+
 
 var lightPos = gui.addFolder("Light Position");
 lightPos
@@ -425,6 +445,7 @@ let maze_mat = new Maze();
 
 // barrel
 var barrels = [];
+var specificBarrel;
 var barrel_updownTheta = [];
 var barrel_rotationTheta = [];
 for (var vertex of maze_mat.graph.getVertices()) {
@@ -443,6 +464,16 @@ for (var vertex of maze_mat.graph.getVertices()) {
         scene.add(collada.scene);
     });
 }
+function collectedObject(){
+    loader.load("models/barrel.dae", function(collada) {
+        collada.scene.position.x += 0;
+        collada.scene.position.y += 1;
+        collada.scene.position.z += 0;
+        specificBarrel = collada.scene;
+        scene.add(collada.scene);
+    });
+}
+    
 // COLLADA END
 
 // Game Logic
@@ -915,16 +946,22 @@ audioLoader.load("sounds/main-theme.mp3", function(buffer) {
 });
 
 let oneTimes = 1;
-let specificBarrel;
-//function objectTranslation(obj){
-//    obj.position.set(ball.position.x, ball.position.y + 5, ball.position.z);
-//}
+//let specificBarrel;
+
+function objectTranslation(obj){
+    obj.position.set(ball.position.x, ball.position.y+1, ball.position.z);
+    obj.rotation.x += sliderOptions.rotationObjX;
+    obj.rotation.y += sliderOptions.rotationObjY;
+    obj.rotation.z += sliderOptions.rotationObjZ;
+    console.log(obj)
+}
 var GameLoop = function() {
     requestAnimationFrame(GameLoop);
 
     if(BallObject && GhostObject && GhostObject2 && GhostObject3 && oneTimes){
         
         makePhongShading();
+        collectedObject();
         oneTimes=0;
     }
     // random barrel movements
@@ -950,7 +987,9 @@ var GameLoop = function() {
     }
 
     useSliders();
-
+    if(ball && score > 0){
+        objectTranslation(specificBarrel);
+    }
     if (gameCondition === 2 && ball) {
         if (collisionCheckForMaze() === false) {
             if (isPressW) {
@@ -1049,9 +1088,10 @@ var GameLoop = function() {
             console.log("ghost3 collision!");
             gameOver();
         } else if (barrelsCollisionCheckResult != -23) {
-                barrels[barrelsCollisionCheckResult]["visible"] = false;
+            //specificBarrel = barrels[barrelsCollisionCheckResult];
+            barrels[barrelsCollisionCheckResult]["visible"] = false;
             
-            //objectTranslation(barrels[barrelsCollisionCheckResult])
+            //objectTranslation(specificBarrel);
             score++;
         }
 
