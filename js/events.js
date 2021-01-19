@@ -140,14 +140,24 @@ function addPauseMenu(){
         
 }
 
-function enterNickNameMenu(){
+function enterNickNameMenu(gameCondition){
     const body = document.querySelector("body");
-        
+    let text1; 
+    let text2; 
+    if(gameCondition===4){
+        text1 = "GAME OVER";
+        text2 = "";
+    }
+    else if(gameCondition === 5){
+        text1 = "CONGRATULATIONS";
+        text2 = "You saved the world!"
+    }
     let element = document.createElement("div");
     element.id = "logoAndMenu";
     element.innerHTML = `
       <div id="finishedGame">
-        <div class="name">GAME OVER</div>
+        <div class="name"> ${text1} </div>
+        <div class="yourScore">${text2}</div>
         <div class="yourScore">Your score: ${score}</div>
         <form id = "todo-form" name="form">
             <input class="form-control" type="text" name="nickname" id = "nickname" placeholder="Enter a Nickname">
@@ -173,4 +183,5 @@ function addScoreboard(){
 function removeScoreboard(){
     document.querySelector("body").style.alignItems = "center";
     document.querySelector("body").style.justifyContent = "center";
+    document.getElementById("scoreboard").remove();
 }

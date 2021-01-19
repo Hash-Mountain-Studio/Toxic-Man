@@ -38,8 +38,15 @@ function gameOver() {
     removeScoreboard();
     gameCondition = 4;
     changed = 1;
-    enterNickNameMenu();
+    enterNickNameMenu(gameCondition);
 }
+function youWon() {
+    removeScoreboard();
+    gameCondition = 5;
+    changed = 1;
+    enterNickNameMenu(gameCondition);
+}
+
 
 document.addEventListener("click", function(e) {
     if (e.target.id === "playButton") {
@@ -161,4 +168,5 @@ export {
     updateCameraInStart,
     degToRad,
     gameOver,
+    youWon
 };

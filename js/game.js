@@ -9,6 +9,7 @@ import {
     updateCameraInStart,
     degToRad,
     gameOver,
+    youWon
 } from "./startMenu.js";
 import * as dat from "../dependencies/dat.gui.module.js";
 var scene = new THREE.Scene();
@@ -45,10 +46,28 @@ window.addEventListener("resize", function() {
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
 });
+
+//texture
+const groundTexture = new THREE.TextureLoader().load( "ground.png" );
+console.log(groundTexture);
+groundTexture.wrapS = THREE.RepeatWrapping;
+groundTexture.wrapT = THREE.RepeatWrapping;
+groundTexture.repeat.set( 16, 16 );
+
+//texture
+const wallTexture = new THREE.TextureLoader().load( "wall.png" );
+console.log(wallTexture);
+wallTexture.wrapS = THREE.RepeatWrapping;
+wallTexture.wrapT = THREE.RepeatWrapping;
+wallTexture.rotation = degToRad(90);
+wallTexture.repeat.set( 2, 2 );
+
 // THREE.JS PLANE
 const plane_geometry = new THREE.PlaneGeometry(32, 32, 8, 8);
 const plane_material = new THREE.MeshLambertMaterial({
-    color: 0xffff00,
+    //color: 0xffff00,
+    map: groundTexture,
+    color: 0xaaaaaa,
     side: THREE.DoubleSide,
 });
 const plane = new THREE.Mesh(plane_geometry, plane_material);
@@ -107,6 +126,7 @@ var cube = new THREE.Mesh(cubegeo, cubeMaterial);
 var sliderOptions = {
     //paused: false,
     muted: false,
+    godMode: false,
     changeFreely: false,
     isDay: true,
     spotLightFromAbove: true,
@@ -142,6 +162,7 @@ var gui = new dat.GUI();
 
 var general = gui.addFolder("General Settings");
 general.add(sliderOptions, "muted").listen();
+general.add(sliderOptions, "godMode").listen();
 general.add(sliderOptions, "changeFreely").listen();
 general
     .add(sliderOptions, "isDay")
@@ -292,7 +313,7 @@ const useSliders = function() {
             sliderOptions.spotLightPositionY,
             sliderOptions.spotLightPositionZ
         );
-        spotLight.target.position.set(
+        spotLight.rotation.set(
             sliderOptions.spotLightTargetX,
             sliderOptions.spotLightTargetY,
             sliderOptions.spotLightTargetZ
@@ -592,6 +613,9 @@ function collisionCheckForMaze() {
 
 function collisionCheckForTwoSpheres(obj1, obj2, r1, r2) {
     // Sphere Coordinates
+    if(sliderOptions.godMode){
+        return false;
+    }
     let x1 = obj1.position.x;
     let y1 = obj1.position.y;
     let z1 = obj1.position.z;
@@ -685,15 +709,20 @@ function moveRight() {
 function makeToonShading() {
     let materialRedToonShading = new THREE.MeshToonMaterial({
         color: 0xff0346,
+        
     });
 
     // ONLY FOR PLANE
     let materialYellowToonShading = new THREE.MeshToonMaterial({
-        color: 0xc7f100,
+        map: groundTexture,
+        color: 0xaaaaaa,
         side: THREE.DoubleSide,
     });
 
-    let materialBlueToonShading = new THREE.MeshToonMaterial({ color: 0x0097ff });
+    let materialBlueToonShading = new THREE.MeshToonMaterial({ 
+        map: wallTexture,
+        color: 0x999999, 
+    });
 
     let materialGreenToonShading = new THREE.MeshToonMaterial({
         color: 0x00ff58,
@@ -742,7 +771,8 @@ function makePhongShading() {
         ambient: 0x050505,
         specular: 0x555555,
         shininess: 30,
-        color: 0xc7f100,
+        map: groundTexture,
+        color: 0xaaaaaa,
         side: THREE.DoubleSide,
     });
 
@@ -750,7 +780,8 @@ function makePhongShading() {
         ambient: 0x050505,
         specular: 0x555555,
         shininess: 30,
-        color: 0x0097ff,
+        map: wallTexture,
+        color: 0x999999, 
     });
 
     let materialGreenPhongShading = new THREE.MeshPhongMaterial({
@@ -810,7 +841,8 @@ function makeLambertShading() {
         ambient: 0x050505,
         specular: 0x555555,
         shininess: 30,
-        color: 0xc7f100,
+        map: groundTexture,
+        color: 0xaaaaaa,
         side: THREE.DoubleSide,
     });
 
@@ -818,7 +850,8 @@ function makeLambertShading() {
         ambient: 0x050505,
         specular: 0x555555,
         shininess: 30,
-        color: 0x0097ff,
+        map: wallTexture,
+        color: 0x999999,
     });
 
     let materialGreenLambertShading = new THREE.MeshLambertMaterial({
@@ -881,9 +914,19 @@ audioLoader.load("sounds/main-theme.mp3", function(buffer) {
     sound.play();
 });
 
+let oneTimes = 1;
+let specificBarrel;
+//function objectTranslation(obj){
+//    obj.position.set(ball.position.x, ball.position.y + 5, ball.position.z);
+//}
 var GameLoop = function() {
     requestAnimationFrame(GameLoop);
 
+    if(BallObject && GhostObject && GhostObject2 && GhostObject3 && oneTimes){
+        
+        makePhongShading();
+        oneTimes=0;
+    }
     // random barrel movements
     for (let b = 0; b < barrels.length; b++) {
         barrels[b].position.y =
@@ -1006,7 +1049,9 @@ var GameLoop = function() {
             console.log("ghost3 collision!");
             gameOver();
         } else if (barrelsCollisionCheckResult != -23) {
-            barrels[barrelsCollisionCheckResult]["visible"] = false;
+                barrels[barrelsCollisionCheckResult]["visible"] = false;
+            
+            //objectTranslation(barrels[barrelsCollisionCheckResult])
             score++;
         }
 
@@ -1019,7 +1064,9 @@ var GameLoop = function() {
         GhostObject3.action();
         GhostObject3.resetMotion();
 
-        document.getElementById("scoreboard").textContent = "Score: " + score;
+        if(gameCondition !==4 && gameCondition !== 5){
+            document.getElementById("scoreboard").textContent = "Score: " + score;
+        }
 
         if (!sliderOptions.changeFreely) {
             camera.position.x =
