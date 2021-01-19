@@ -105,6 +105,7 @@ class Graph {
         this.dijkstra_sp(start);
         var to_node = dest;
         var path = [];
+        console.log(dest);
         while (to_node != start) {
             let from_node = this.edgeTo.get(to_node);
 

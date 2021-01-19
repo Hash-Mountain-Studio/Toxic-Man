@@ -663,6 +663,9 @@ function collisionCheckForMaze() {
 }
 
 function collisionCheckForTwoSpheres(obj1, obj2, r1, r2) {
+    if (using_powerUp == "hammer") {
+        return false;
+    }
     // Sphere Coordinates
     if(sliderOptions.godMode){
         return false;
@@ -778,6 +781,31 @@ function collisionCheckForPowerUps() {
     using_powerUp = "";
     return null;
 }
+
+function collisionCheckForHammer(ghst) {
+    // Sphere Coordinates
+    let sx = ghst.position.x;
+    let sy = ghst.position.y;
+    let sz = ghst.position.z;
+    let radius = 0.75;
+
+    // hammer Coordinates
+    let cx = hammer["position"]["x"];
+    let cy = hammer["position"]["y"];
+    let cz = hammer["position"]["z"];
+    let hammerRadius = 0.75;
+    if (
+        cx - hammerRadius - radius < sx &&
+        sx <= cx + hammerRadius + radius &&
+        cz - hammerRadius - radius <= sz &&
+        sz <= cz + hammerRadius + radius &&
+        ghst["visible"] === true
+    ) {
+        return true;
+    }
+    return false;
+}
+
 
 
 function moveForward() {
@@ -1032,6 +1060,7 @@ audioLoader.load("sounds/main-theme.mp3", function(buffer) {
 let oneTimes = 1;
 let isFocus = 0;
 let isCollision = 0;
+let ghostRunningtarget = "0:14";
 //let specificBarrel;
 
 function objectTranslation(obj, angleFix, positionFixY, positionFixZ){
@@ -1113,9 +1142,9 @@ var GameLoop = function() {
                         if (using_powerUp == "hammer") {
                             hammerDown = true;
                         }
-                        // else if (using_powerUp == "wings") {
-                        //     speed = 0.2;
-                        // }
+                        else if (using_powerUp == "wings") {
+                            speed = 0.2;
+                        }
                     }
         
                     if (hammerDown) {
@@ -1132,7 +1161,21 @@ var GameLoop = function() {
                         }
                         hammer.rotation.y  += degToRad(hammerDownSpeed)
                         hammer.rotation.y = Math.round(hammer.rotation.y * 100) / 100;
+                        if (collisionCheckForHammer(ghost1)) {
+                            ghost1["visible"] = false;
+                        }
+                        if (collisionCheckForHammer(ghost2)) {
+                            ghost2["visible"] = false;
+                        }
+                        if (collisionCheckForHammer(ghost3)) {
+                            ghost3["visible"] = false;
+                        }
+
+
+
                     }
+
+
                 }
             }
         }  
@@ -1182,14 +1225,25 @@ var GameLoop = function() {
             if ((newPath_counter >= 100 && !GhostObject.isCommand_continue) || GhostObject.path.length == 0) {
             // console.log("new path calculating");
             let current_command = GhostObject.path[0];
-            GhostObject.path = maze_mat.graph.shortest_path(
-                GhostObject.get_mazeCoord(maze_mat),
-                BallObject.get_mazeCoord(maze_mat));
+            if (using_powerUp == "hammer") {
+                if (GhostObject.path.length == 0) {
+                    ghostRunningtarget = maze_mat.getRandomCorner_except(ghostRunningtarget);
+                }
+                GhostObject.path = maze_mat.graph.shortest_path(
+                    GhostObject.get_mazeCoord(maze_mat), ghostRunningtarget);
+                    newPath_counter = 0;
+            }
+            else{
+                console.log(GhostObject.get_mazeCoord(maze_mat));
+                GhostObject.path = maze_mat.graph.shortest_path(
+                    GhostObject.get_mazeCoord(maze_mat),
+                    BallObject.get_mazeCoord(maze_mat));
+                newPath_counter = 0
+            }
             
             // if (current_command != undefined) {
             //     GhostObject.path.unshift(current_command);
             // }
-            newPath_counter = 0
             }
             else{
                 newPath_counter++;

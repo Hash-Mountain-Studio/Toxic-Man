@@ -549,6 +549,16 @@ class Maze {
 
     }
 
+    getRandomCorner_except(exception){
+        let corners = ["0:0", "0:14", "14:14", "14:0"];
+        let excp = exception;
+        while(excp == exception){
+            let rand = Math.floor(Math.random() * 10)%4;
+            excp = corners[rand];
+        }
+        return excp;
+    }
+
     print_mazeMat() {
         var lines = [];
         this.maze_matrix.forEach((row) => {
