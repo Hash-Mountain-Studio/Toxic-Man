@@ -477,6 +477,7 @@ let maze_mat = new Maze();
 var barrels = [];
 var barrel_updownTheta = [];
 var barrel_rotationTheta = [];
+var total_barrel = 0;
 for (var vertex of maze_mat.graph.getVertices()) {
     let passNode = Math.random() < 0.5;
     if (passNode) {
@@ -488,6 +489,7 @@ for (var vertex of maze_mat.graph.getVertices()) {
         collada.scene.position.y += 0.5;
         collada.scene.position.z += worldLoc.z;
         barrels.push(collada.scene);
+        total_barrel++;
         barrel_updownTheta.push(Math.floor(Math.random() * 180));
         barrel_rotationTheta.push(Math.floor(Math.random() * 180));
         scene.add(collada.scene);
@@ -684,7 +686,8 @@ function collisionCheckForTwoSpheres(obj1, obj2, r1, r2) {
         x1 - r1 - r2 < x2 &&
         x2 <= x1 + r1 + r2 &&
         z1 - r1 - r2 <= z2 &&
-        z2 <= z1 + r1 + r2
+        z2 <= z1 + r1 + r2 &&
+        obj2["visible"] == true
     ) {
         return true;
     } else {
@@ -724,6 +727,10 @@ function collisionCheckForBarrels() {
 
 let using_powerUp = "";
 let hammerDownSpeed = 10;
+let hammerCounter = 0;
+let wingsTimer = 0;
+let wingsCounter = 0;
+let wingsActive = false;
 
 function collisionCheckForPowerUps() {
     // Sphere Coordinates
@@ -1174,8 +1181,9 @@ var GameLoop = function() {
                     if (isSpace) {
                         if (using_powerUp === "hammer") {
                             hammerDown = true;
-                        } else if (using_powerUp === "wings") {
-                            speed = 0.2;
+                        }
+                        else if (using_powerUp == "wings" && wingsCounter != 3) {
+                            wingsActive = true;
                         }
                     }
 
@@ -1185,13 +1193,19 @@ var GameLoop = function() {
                         }
                         if (hammer.rotation.y < degToRad(0)) {
                             console.log(hammer.rotation.y);
-
-                            hammer.rotation.y = Math.round(degToRad(0) * 100) / 100;
+        
+                            hammer.rotation.y = Math.round(degToRad(0)*100)/100;
                             hammerDownSpeed = -hammerDownSpeed;
                             console.log(hammer.rotation.y);
-                            hammerDown = false;
+                            hammerDown = false; 
+                            hammerCounter++;
+                            if (hammerCounter == 3) {
+                                hammer["visible"] = false;
+                                using_powerUp == "";
+                            }
+                            
                         }
-                        hammer.rotation.y += degToRad(hammerDownSpeed);
+                        hammer.rotation.y  += degToRad(hammerDownSpeed)
                         hammer.rotation.y = Math.round(hammer.rotation.y * 100) / 100;
                         if (collisionCheckForHammer(ghost1)) {
                             ghost1["visible"] = false;
@@ -1201,6 +1215,22 @@ var GameLoop = function() {
                         }
                         if (collisionCheckForHammer(ghost3)) {
                             ghost3["visible"] = false;
+                        }
+                    }
+                    if (wingsActive) {
+                        speed = 0.2;
+                        wingsTimer++;
+                        if (wingsTimer >= 30) {
+                            wingsTimer = 0;
+                            speed = 0.1;
+                            wingsActive = false;
+                            wingsCounter += 1;
+                        }
+                        if (wingsCounter == 3) {
+                            wingsTimer = 0;
+                            wingsActive = false;
+                            speed = 0.1
+                            wings["visible"] = false;
                         }
                     }
                 }
@@ -1324,6 +1354,7 @@ var GameLoop = function() {
             } else if (barrelsCollisionCheckResult != -23) {
                 barrels[barrelsCollisionCheckResult]["visible"] = false;
                 score++;
+                total_barrel--;
             }
 
             BallObject.action();
@@ -1376,7 +1407,9 @@ var GameLoop = function() {
             }
             spotLight.target.updateMatrixWorld();
         }
-
+        if (total_barrel == 0) {
+            youWon();
+        }
         // corner check
         //let corner = maze_mat.corner_check(ball.position.x, ball.position.z);
         //rotateCam_inCorner(corner, ball.position, camera, isPressD, isPressA);
