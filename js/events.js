@@ -84,6 +84,14 @@ function addControls(){
                   <th scope="col">q</th>
                   <th scope="col">Quit Game</th>
                 </tr>
+                <tr>
+                  <th scope="col">c</th>
+                  <th scope="col">Examine Object</th>
+                </tr>
+                <tr>
+                  <th scope="col">Space</th>
+                  <th scope="col">Use Power-Up</th>
+                </tr>
             </tbody>
         </table>
       </div>`;
