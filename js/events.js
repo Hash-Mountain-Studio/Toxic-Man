@@ -11,9 +11,9 @@ function removeElement(elementId) {
     element.parentNode.parentNode.remove();
 }
 
-function addHighScoreTable(){
+function addHighScoreTable() {
     const body = document.querySelector("body");
-            
+
     let element = document.createElement("div");
     element.id = "highScoreTable";
     element.innerHTML = `
@@ -35,10 +35,10 @@ function addHighScoreTable(){
 
     body.appendChild(element);
     const tbody = document.querySelector("tbody");
-    for(let i=0; i<getHighScoresFromStorage().length; i++){
+    for (let i = 0; i < getHighScoresFromStorage().length; i++) {
         let element = document.createElement("tr");
         element.innerHTML = `
-                  <th scope="col">${i+1}</th>
+                  <th scope="col">${i + 1}</th>
                   <th scope="col">${getHighScoresFromStorage()[i][0]}</th>
                   <th scope="col">${getHighScoresFromStorage()[i][1]}</th>
                   <th scope="col">${getHighScoresFromStorage()[i][2]}</th>`;
@@ -46,7 +46,7 @@ function addHighScoreTable(){
     }
 }
 
-function addControls(){
+function addControls() {
     const body = document.querySelector("body");
     let element = document.createElement("div");
     element.id = "controlTable";
@@ -70,7 +70,7 @@ function addControls(){
                 </tr>
                 <tr>
                   <th scope="col">d</th>
-                  <th scope="col">Move Righ</th>
+                  <th scope="col">Move Right</th>
                 </tr>
                 <tr>
                   <th scope="col">e</th>
@@ -86,7 +86,7 @@ function addControls(){
                 </tr>
                 <tr>
                   <th scope="col">c</th>
-                  <th scope="col">Examine Object</th>
+                  <th scope="col">Inspect Object</th>
                 </tr>
                 <tr>
                   <th scope="col">Space</th>
@@ -99,9 +99,9 @@ function addControls(){
     body.appendChild(element);
 }
 
-function addStartMenu(){
+function addStartMenu() {
     const body = document.querySelector("body");
-        
+
     let element = document.createElement("div");
     element.id = "logoAndMenu";
     element.innerHTML = `
@@ -121,10 +121,9 @@ function addStartMenu(){
       </div>`;
 
     body.appendChild(element);
-        
 }
 
-function addPauseMenu(){
+function addPauseMenu() {
     const body = document.querySelector("body");
     let element = document.createElement("div");
     element.id = "logoAndMenu";
@@ -145,20 +144,18 @@ function addPauseMenu(){
         <button id ="controls" class="menuButton">Controls</button>
       </div>`;
     body.appendChild(element);
-        
 }
 
-function enterNickNameMenu(gameCondition){
+function enterNickNameMenu(gameCondition) {
     const body = document.querySelector("body");
-    let text1; 
-    let text2; 
-    if(gameCondition===4){
+    let text1;
+    let text2;
+    if (gameCondition === 4) {
         text1 = "GAME OVER";
         text2 = "";
-    }
-    else if(gameCondition === 5){
+    } else if (gameCondition === 5) {
         text1 = "CONGRATULATIONS";
-        text2 = "You saved the world!"
+        text2 = "You saved the world!";
     }
     let element = document.createElement("div");
     element.id = "logoAndMenu";
@@ -177,18 +174,18 @@ function enterNickNameMenu(gameCondition){
     addToStorage();
 }
 
-function addScoreboard(){
-    
+function addScoreboard() {
     document.querySelector("body").style.alignItems = "";
     document.querySelector("body").style.justifyContent = "";
-    
+
     let element = document.createElement("div");
     element.id = "scoreboard";
     element.innerHTML = `Score: 0`;
 
     document.querySelector("body").appendChild(element);
 }
-function removeScoreboard(){
+
+function removeScoreboard() {
     document.querySelector("body").style.alignItems = "center";
     document.querySelector("body").style.justifyContent = "center";
     document.getElementById("scoreboard").remove();

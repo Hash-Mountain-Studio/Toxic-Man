@@ -55,14 +55,12 @@ window.addEventListener("resize", function() {
 
 //texture
 const groundTexture = new THREE.TextureLoader().load("../textures/ground.jpeg");
-// console.log(groundTexture);
 groundTexture.wrapS = THREE.RepeatWrapping;
 groundTexture.wrapT = THREE.RepeatWrapping;
 groundTexture.repeat.set(16, 16);
 
 //texture
 const wallTexture = new THREE.TextureLoader().load("../textures/wall.jpg");
-// console.log(wallTexture);
 wallTexture.wrapS = THREE.RepeatWrapping;
 wallTexture.wrapT = THREE.RepeatWrapping;
 wallTexture.rotation = degToRad(90);
@@ -152,6 +150,7 @@ var sliderOptions = {
     lightPositionX: 50,
     lightPositionY: 200,
     lightPositionZ: 50,
+    intensity: 2,
 
     spotLightPositionX: 0,
     spotLightPositionY: 10,
@@ -287,6 +286,13 @@ spotLightTarget
     .listen();
 spotLightTarget.open();
 
+var spotLightExtras = gui.addFolder("Spot Light Extras");
+spotLightExtras
+    .add(sliderOptions, "intensity", 0, 10)
+    .name("Intensity")
+    .listen();
+spotLightExtras.open();
+
 var cameraPos = gui.addFolder("Camera Position");
 cameraPos
     .add(sliderOptions, "cameraPositionX", -50, 50)
@@ -318,6 +324,7 @@ cameraTarget
 cameraTarget.open();
 
 const useSliders = function() {
+    spotLight.intensity = sliderOptions.intensity;
     //lightPosition
     hemiLightDay.position.set(
         sliderOptions.lightPositionX,
@@ -382,6 +389,7 @@ spotLight.angle = Math.PI / 8;
 spotLight.penumbra = 1;
 spotLight.decay = 2;
 spotLight.distance = 50;
+spotLight.intensity = sliderOptions.intensity;
 
 spotLight.intensity = 3;
 
@@ -492,15 +500,6 @@ for (var vertex of maze_mat.graph.getVertices()) {
         total_barrel++;
         barrel_updownTheta.push(Math.floor(Math.random() * 180));
         barrel_rotationTheta.push(Math.floor(Math.random() * 180));
-        scene.add(collada.scene);
-    });
-}
-
-function collectedObject() {
-    loader.load("models/barrel.dae", function(collada) {
-        collada.scene.position.x += 0;
-        collada.scene.position.y += 1;
-        collada.scene.position.z += 0;
         scene.add(collada.scene);
     });
 }
@@ -703,8 +702,6 @@ function collisionCheckForBarrels() {
     let radius = 0.5;
 
     for (let i = 0; i < barrels.length; i++) {
-        //  console.log(i);
-
         let currentBarrel = barrels[i];
         // Cube Coordinates
         let cx = currentBarrel["position"]["x"];
@@ -1108,16 +1105,13 @@ function objectTranslation(obj, angleFix, positionFixY, positionFixZ) {
         ball.position.z
     );
     obj.rotation.x = -Math.PI / 2;
-    // obj.rotation.y = 0;
     obj.rotation.z = -degToRad(rotation_angleX) + degToRad(angleFix);
-    //console.log(obj)
 }
 
 function objectRotation(obj) {
     obj.rotation.x += sliderOptions.rotationObjX;
     obj.rotation.y += sliderOptions.rotationObjY;
     obj.rotation.z += sliderOptions.rotationObjZ;
-    //console.log(obj)
 }
 
 var GameLoop = function() {
@@ -1125,7 +1119,6 @@ var GameLoop = function() {
 
     if (BallObject && GhostObject && GhostObject2 && GhostObject3 && oneTimes) {
         makePhongShading();
-        collectedObject();
         oneTimes = 0;
     }
     // random barrel movements
@@ -1153,7 +1146,6 @@ var GameLoop = function() {
     useSliders();
     if (ball && wings && hammer) {
         let powerObject = collisionCheckForPowerUps();
-        //console.log(using_powerUp);
         if (using_powerUp !== "") {
             setCanFocus(1);
             if (focus) {
@@ -1181,8 +1173,7 @@ var GameLoop = function() {
                     if (isSpace) {
                         if (using_powerUp === "hammer") {
                             hammerDown = true;
-                        }
-                        else if (using_powerUp == "wings" && wingsCounter != 3) {
+                        } else if (using_powerUp == "wings" && wingsCounter != 3) {
                             wingsActive = true;
                         }
                     }
@@ -1192,20 +1183,16 @@ var GameLoop = function() {
                             hammerDownSpeed = -hammerDownSpeed;
                         }
                         if (hammer.rotation.y < degToRad(0)) {
-                            console.log(hammer.rotation.y);
-        
-                            hammer.rotation.y = Math.round(degToRad(0)*100)/100;
+                            hammer.rotation.y = Math.round(degToRad(0) * 100) / 100;
                             hammerDownSpeed = -hammerDownSpeed;
-                            console.log(hammer.rotation.y);
-                            hammerDown = false; 
+                            hammerDown = false;
                             hammerCounter++;
                             if (hammerCounter == 3) {
                                 hammer["visible"] = false;
                                 using_powerUp == "";
                             }
-                            
                         }
-                        hammer.rotation.y  += degToRad(hammerDownSpeed)
+                        hammer.rotation.y += degToRad(hammerDownSpeed);
                         hammer.rotation.y = Math.round(hammer.rotation.y * 100) / 100;
                         if (collisionCheckForHammer(ghost1)) {
                             ghost1["visible"] = false;
@@ -1229,7 +1216,7 @@ var GameLoop = function() {
                         if (wingsCounter == 3) {
                             wingsTimer = 0;
                             wingsActive = false;
-                            speed = 0.1
+                            speed = 0.1;
                             wings["visible"] = false;
                         }
                     }
@@ -1283,7 +1270,6 @@ var GameLoop = function() {
                 (newPath_counter >= 100 && !GhostObject.isCommand_continue) ||
                 GhostObject.path.length == 0
             ) {
-                // console.log("new path calculating");
                 let current_command = GhostObject.path[0];
                 if (using_powerUp == "hammer") {
                     if (GhostObject.path.length == 0) {
@@ -1297,7 +1283,6 @@ var GameLoop = function() {
                     );
                     newPath_counter = 0;
                 } else {
-                    console.log(GhostObject.get_mazeCoord(maze_mat));
                     GhostObject.path = maze_mat.graph.shortest_path(
                         GhostObject.get_mazeCoord(maze_mat),
                         BallObject.get_mazeCoord(maze_mat)
@@ -1329,7 +1314,6 @@ var GameLoop = function() {
                     0.75
                 ) == true
             ) {
-                console.log("ghost1 collision!");
                 gameOver();
             } else if (
                 collisionCheckForTwoSpheres(
@@ -1339,7 +1323,6 @@ var GameLoop = function() {
                     0.75
                 ) == true
             ) {
-                console.log("ghost2 collision!");
                 gameOver();
             } else if (
                 collisionCheckForTwoSpheres(
@@ -1349,7 +1332,6 @@ var GameLoop = function() {
                     0.75
                 ) == true
             ) {
-                console.log("ghost3 collision!");
                 gameOver();
             } else if (barrelsCollisionCheckResult != -23) {
                 barrels[barrelsCollisionCheckResult]["visible"] = false;
