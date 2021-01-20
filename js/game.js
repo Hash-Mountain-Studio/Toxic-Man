@@ -37,10 +37,6 @@ var camera = new THREE.PerspectiveCamera(
 );
 camera.position.set(-15, 0, -0.035);
 
-// we dont need this since we have two type of camera move options (mouse or keys)
-// let controls = new THREE.OrbitControls(camera, renderer.domElement);
-// controls.update();
-
 var renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
@@ -85,17 +81,6 @@ const plane_material = new THREE.MeshLambertMaterial({
 const plane = new THREE.Mesh(plane_geometry, plane_material);
 plane.rotateX(Math.PI / 2);
 plane.position.y = 0.001;
-
-// THREE.JS PLANE
-// const plane_geometry = new THREE.PlaneGeometry(32, 32, 8, 8);
-// const plane_texture = new THREE.TextureLoader().load( 'ground.png' );
-// const plane_material = new THREE.MeshBasicMaterial({
-//     map: plane_texture,
-//     side: THREE.DoubleSide,
-// });
-// const plane = new THREE.Mesh(plane_geometry, plane_material);
-// plane.rotateX(Math.PI / 2);
-// plane.position.y = 0.001;
 
 var cubegeo = new THREE.CubeGeometry(1000, 1000, 1000);
 var cube_materials = [
@@ -353,7 +338,7 @@ const useSliders = function() {
             sliderOptions.spotLightPositionY,
             sliderOptions.spotLightPositionZ
         );
-        spotLight.rotation.set(
+        spotLight.target.position.set(
             sliderOptions.spotLightTargetX,
             sliderOptions.spotLightTargetY,
             sliderOptions.spotLightTargetZ
@@ -633,7 +618,6 @@ function updateCamera(e) {
         }
     }
 
-    //eyeY += e.movementY * 0.005;
 }
 
 // shortest path from ghost's locaction to pacman's location
@@ -1150,7 +1134,6 @@ var GameLoop = function() {
             setCanFocus(1);
             if (focus) {
                 if (!isFocus) {
-                    //camera.position.set(ball.position.x, ball.position.y+3, ball.position.z-2);
                     powerObject.position.y += 2;
                     camera.lookAt(powerObject.position);
                 }
@@ -1229,39 +1212,20 @@ var GameLoop = function() {
             if (isPressW) {
                 moveForward();
                 if (collisionCheckForMaze() === true) moveBackward();
-                // ball.position.x += speed * Math.cos(degToRad(rotation_angleX));
-                // ball.position.z += speed * Math.sin(degToRad(rotation_angleX));
-
-                // angleX += angleIncrement;
-                // ball.rotation.y = angleX * (Math.PI / 180);
             }
             if (isPressS) {
                 moveBackward();
                 if (collisionCheckForMaze() === true) moveForward();
-                // ball.position.x -= speed * Math.cos(degToRad(rotation_angleX));
-                // ball.position.z -= speed * Math.sin(degToRad(rotation_angleX));
 
-                // angleX -= angleIncrement;
-                // ball.rotation.y = angleX * (Math.PI / 180);
             }
             if (isPressA) {
                 moveLeft();
                 if (collisionCheckForMaze() === true) moveRight();
-                // ball.position.x += speed * Math.sin(degToRad(rotation_angleX));
-                // ball.position.z -= speed * Math.cos(degToRad(rotation_angleX));
 
-                // angleY -= angleIncrement;
-                // ball.rotation.x = angleY * (Math.PI / 180);
             }
             if (isPressD) {
                 moveRight();
                 if (collisionCheckForMaze() === true) moveLeft();
-
-                // ball.position.x -= speed * Math.sin(degToRad(rotation_angleX));
-                // ball.position.z += speed * Math.cos(degToRad(rotation_angleX));
-
-                // angleY += angleIncrement;
-                // ball.rotation.x = angleY * (Math.PI / 180);
             }
         }
 
@@ -1290,9 +1254,7 @@ var GameLoop = function() {
                     newPath_counter = 0;
                 }
 
-                // if (current_command != undefined) {
-                //     GhostObject.path.unshift(current_command);
-                // }
+
             } else {
                 newPath_counter++;
             }
@@ -1392,10 +1354,6 @@ var GameLoop = function() {
         if (total_barrel == 0) {
             youWon();
         }
-        // corner check
-        //let corner = maze_mat.corner_check(ball.position.x, ball.position.z);
-        //rotateCam_inCorner(corner, ball.position, camera, isPressD, isPressA);
-        //maze_mat.refresh_mazeMat(ball.position.x, ball.position.z);
     }
     update();
     render();

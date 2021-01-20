@@ -1,5 +1,4 @@
 class Graph {
-    //https://www.geeksforgeeks.org/implementation-graph-javascript/
     constructor(){
         this.vertex_num = 0;
         this.adjList = new Map();
@@ -146,13 +145,9 @@ class Graph {
      
         // iterate over the vertices
         for (var i of get_keys) {
-            // great the corresponding adjacency list
-            // for the vertex
             var get_values = this.adjList.get(i);
             var conc = "";
      
-            // iterate over the adjacency list
-            // concatenate the values into a string
             for (var j of get_values){
                 conc += j + " ";
             }
@@ -166,9 +161,6 @@ class Graph {
 
 }
 
-
-
-// pq implementation from https://www.geeksforgeeks.org/implementation-priority-queue-javascript/
 class QElement { 
     constructor(element, priority) 
     { 
@@ -192,9 +184,6 @@ class PriorityQueue {
         var qElement = new QElement(element, priority); 
         var contain = false; 
     
-        // iterating through the entire 
-        // item array to add element at the 
-        // correct location of the Queue 
         for (var i = 0; i < this.items.length; i++) { 
             if (this.items[i].priority > qElement.priority) { 
                 // Once the correct location is found it is 
@@ -205,41 +194,30 @@ class PriorityQueue {
             } 
         } 
     
-        // if the element have the highest priority 
-        // it is added at the end of the queue 
         if (!contain) { 
             this.items.push(qElement); 
         } 
     } 
 
     dequeue() { 
-        // return the dequeued element 
-        // and remove it. 
-        // if the queue is empty 
-        // returns Underflow 
         if (this.isEmpty()) 
             return "Underflow"; 
         return this.items.shift(); 
     } 
 
     front() { 
-        // returns the highest priority element 
-        // in the Priority queue without removing it. 
         if (this.isEmpty()) 
             return "No elements in Queue"; 
         return this.items[0]; 
     }
 
     rear() { 
-        // returns the lowest priorty 
-        // element of the queue 
         if (this.isEmpty()) 
             return "No elements in Queue"; 
         return this.items[this.items.length - 1]; 
     }
 
     isEmpty() { 
-        // return true if the queue is empty. 
         return this.items.length == 0; 
     }
 
