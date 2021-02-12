@@ -31,8 +31,6 @@ https://youtu.be/YlF5vE6nfBQ
 
 ## Project Presentation
 
-<img src="./presentation/1.jpeg" alt="2" style="zoom:50%;" />
-
 <img src="./presentation/2.jpeg" alt="2" style="zoom:50%;" />
 
 <img src="./presentation/3.jpeg" alt="2" style="zoom:50%;" />
