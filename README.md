@@ -1,4 +1,4 @@
-<img src="./presentation/logo.png" alt="2" style="zoom:50%;" />
+<img src="./presentation/logo.png" alt="2" style="zoom:20%;" />
 
 # Toxic-Man ®
 
