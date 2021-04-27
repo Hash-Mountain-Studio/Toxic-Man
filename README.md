@@ -6,6 +6,10 @@ Toxic-Man is a term project of **BBM412 Computer Graphics** course of *Computer 
 
 This term project theme was Environmental Issues, therefore we aimed to remake 3D version of **Pacman**, switched Toxic-Man to raise an awareness for **chemical pollution**. The game consists of **physics-engine**, different types of **shadings and lightnings**, textures, **power-ups** such as speed-up and hammer, **intelligent ghosts**, and GUI for game settings.
 
+## Demo
+[Play Toxic-Man](https://yusufketen.com/toxic-man)
+
+
 ### Execution
 
 *Chrome is recommended for the best game experience.*
@@ -26,9 +30,6 @@ http-server -o --cors
 ### Trailer
 
 https://youtu.be/YlF5vE6nfBQ
-
-### Gameplay
-[Play Toxic-Man](https://yusufketen.com/toxic-man)
 
 
 ## Project Presentation
