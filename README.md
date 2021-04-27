@@ -27,8 +27,8 @@ http-server -o --cors
 
 https://youtu.be/YlF5vE6nfBQ
 
-### Play Game
-[Play Toxic-Man Link](https://yusufketen.com/toxic-man)
+### Gameplay
+[Play Toxic-Man](https://yusufketen.com/toxic-man)
 
 
 ## Project Presentation
